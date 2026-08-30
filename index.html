@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>E Grubu Vardiya Takvimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F3F5;
+    --surface:#FFFFFF;
+    --ink:#1C232B;
+    --ink-muted:#6B7480;
+    --line:#E1E4E8;
+    --gece:#2E4374;      --gece-soft:#E9ECF6;
+    --dort:#B5652E;      --dort-soft:#FBEEE3;
+    --gunduz:#1E7A8C;    --gunduz-soft:#E4F3F5;
+    --rest:#9AA1AC;      --rest-soft:#EDEFF1;
+    --hat:#C98A2B;       --hat-soft:#FBF0DC;
+    --saha:#4C5B73;      --saha-soft:#EAEDF1;
+    --rz:#B23A3A;        --rz-soft:#FAE7E7;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(28,35,43,.06), 0 4px 14px rgba(28,35,43,.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:40px;
+  }
+  h1,h2,h3,.disp{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.2px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;}
+  .hidden{display:none !important;}
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:30;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+    padding:10px 14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .brand{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;font-size:19px;color:var(--ink);
+    display:flex;flex-direction:column;line-height:1.05;
+  }
+  .brand small{font-family:'Inter',sans-serif;font-weight:500;font-size:11px;color:var(--ink-muted);letter-spacing:.4px;text-transform:uppercase;}
+  .spacer{flex:1;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface);display:flex;align-items:center;justify-content:center;
+    font-size:17px;color:var(--ink);
+  }
+  .icon-btn:active{background:var(--bg);}
+  .person-chip{
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--line);background:var(--surface);
+    border-radius:20px;padding:5px 12px 5px 5px;
+  }
+  .avatar{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--gece);color:#fff;font-weight:700;font-size:12px;
+    display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;
+  }
+  .person-chip span{font-size:13.5px;font-weight:600;}
+
+  /* ---------- landing ---------- */
+  .landing{max-width:520px;margin:0 auto;padding:38px 20px 20px;}
+  .landing h1{font-size:30px;margin:0 0 2px;}
+  .landing p.lead{color:var(--ink-muted);font-size:14.5px;margin:0 0 26px;}
+  .badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .id-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px 14px;
+    display:flex;flex-direction:column;gap:10px;
+    position:relative;overflow:hidden;
+    text-align:left;
+  }
+  .id-card:active{transform:scale(.98);}
+  .id-card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--gece);
+  }
+  .id-card.group::before{background:var(--hat);}
+  .id-card .num{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-muted);
+    letter-spacing:.5px;
+  }
+  .id-card .who{display:flex;align-items:center;gap:10px;}
+  .id-card .avatar{width:36px;height:36px;font-size:14px;}
+  .id-card .name{font-weight:700;font-size:15px;line-height:1.15;}
+  .id-card .role{font-size:11.5px;color:var(--ink-muted);}
+  .id-card.group .avatar{background:var(--hat);}
+
+  /* ---------- calendar screen ---------- */
+  .wrap{max-width:640px;margin:0 auto;padding:14px 12px 10px;}
+  .month-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:8px 6px;margin-bottom:12px;box-shadow:var(--shadow);
+  }
+  .month-nav .navbtn{background:none;border:none;font-size:20px;color:var(--ink);width:38px;height:38px;border-radius:9px;}
+  .month-nav .navbtn:active{background:var(--bg);}
+  .month-label{font-size:19px;text-align:center;}
+  .month-label small{display:block;font-family:'Inter';font-weight:600;font-size:11px;color:var(--ink-muted);letter-spacing:.5px;text-transform:uppercase;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:12px;padding:0 2px;}
+  .legend span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-muted);font-weight:600;}
+  .dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .dow{text-align:center;font-size:10.5px;font-weight:700;color:var(--ink-muted);letter-spacing:.5px;padding-bottom:4px;text-transform:uppercase;}
+  .cell{
+    background:var(--surface);border:1px solid var(--line);border-radius:10px;
+    min-height:64px;padding:6px 5px;position:relative;display:flex;flex-direction:column;gap:4px;
+    overflow:hidden;
+  }
+  .cell.empty{background:transparent;border:none;}
+  .cell.rest{background:var(--rest-soft);}
+  .cell .datenum{font-size:12px;font-weight:700;color:var(--ink);}
+  .cell.rest .datenum{color:var(--ink-muted);}
+  .cell .shiftbar{position:absolute;left:0;top:0;bottom:0;width:4px;}
+  .cell.today{outline:2px solid var(--ink);outline-offset:-2px;}
+  .chip{
+    align-self:flex-start;font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;
+    text-transform:uppercase;letter-spacing:.3px;
+  }
+  .taskcode{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;
+    border-radius:6px;padding:1px 6px;align-self:flex-start;
+  }
+  .saha-tag{font-size:10px;font-weight:600;color:var(--saha);}
+  .rz-tag{font-size:10px;font-weight:700;color:var(--rz);}
+  .rest-tag{font-size:10.5px;font-weight:700;color:var(--ink-muted);margin-top:auto;}
+
+  .cell.gece .shiftbar{background:var(--gece);}
+  .cell.dort .shiftbar{background:var(--dort);}
+  .cell.gunduz .shiftbar{background:var(--gunduz);}
+
+  .chip.gece{background:var(--gece-soft);color:var(--gece);}
+  .chip.dort{background:var(--dort-soft);color:var(--dort);}
+  .chip.gunduz{background:var(--gunduz-soft);color:var(--gunduz);}
+  .taskcode.hat{background:var(--hat-soft);color:var(--hat);}
+  .taskcode.rz{background:var(--rz-soft);color:var(--rz);}
+
+  /* ---------- modal (day detail) ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,24,29,.45);z-index:50;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .sheet{
+    background:var(--surface);width:100%;max-width:640px;border-radius:20px 20px 0 0;
+    padding:18px 18px 26px;max-height:82vh;overflow-y:auto;
+  }
+  .sheet-handle{width:38px;height:4px;background:var(--line);border-radius:3px;margin:0 auto 14px;}
+  .sheet h2{font-size:22px;margin:0 0 2px;}
+  .sheet .sub{color:var(--ink-muted);font-size:13px;margin-bottom:14px;}
+  .info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row .k{color:var(--ink-muted);}
+  .info-row .v{font-weight:600;text-align:right;}
+  .person-table{width:100%;border-collapse:collapse;margin-top:8px;}
+  .person-table th{text-align:left;font-size:10.5px;color:var(--ink-muted);text-transform:uppercase;padding:6px 4px;letter-spacing:.4px;border-bottom:1px solid var(--line);}
+  .person-table td{padding:8px 4px;font-size:13.5px;border-bottom:1px solid var(--line);}
+  .person-table tr:last-child td{border-bottom:none;}
+  .close-sheet{
+    width:100%;margin-top:16px;background:var(--ink);color:#fff;border:none;
+    border-radius:12px;padding:13px;font-weight:700;font-size:14.5px;
+  }
+
+  /* ---------- settings ---------- */
+  .settings-sheet .field{margin-bottom:16px;}
+  .settings-sheet label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+  .settings-sheet input[type=text],.settings-sheet input[type=date],.settings-sheet select{
+    width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;font-family:inherit;background:var(--bg);
+  }
+  .person-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .ht-row{margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed var(--line);}
+  .ht-row:last-child{border-bottom:none;}
+  .flip-label{display:block;font-size:12px;color:var(--ink-muted);line-height:1.4;font-weight:500;text-transform:none;letter-spacing:0;}
+  .person-row input{flex:1;}
+  .rm-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--rz);font-weight:700;}
+  .add-btn{width:100%;border:1px dashed var(--line);border-radius:10px;padding:10px;background:none;color:var(--ink-muted);font-weight:600;font-size:13.5px;}
+  .save-btn{width:100%;background:var(--gece);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:700;font-size:14.5px;margin-top:6px;}
+  .hint{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin-top:4px;}
+  .switch-link{display:block;text-align:center;margin-top:18px;color:var(--gece);font-weight:600;font-size:13.5px;background:none;border:none;width:100%;padding:8px;}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING (kişi seçimi) ============ -->
+<div id="screen-landing" class="landing">
+  <h1>E Grubu Vardiya Takvimi</h1>
+  <p class="lead">Erdemir 2. Soğuk CAL &middot; Devam etmek için kendini seç</p>
+  <div id="badgeGrid" class="badge-grid"></div>
+</div>
+
+<!-- ============ CALENDAR ============ -->
+<div id="screen-calendar" class="hidden">
+  <div class="topbar">
+    <button class="person-chip" id="btnSwitchPerson">
+      <span class="avatar" id="chipAvatar">EG</span>
+      <span id="chipName">Grup</span>
+    </button>
+    <div class="brand"><small>Erdemir 2. Soğuk CAL</small>E Grubu</div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnSettings">&#9881;</button>
+  </div>
+
+  <div class="wrap">
+    <div class="month-nav">
+      <button class="navbtn" id="prevMonth">&#8249;</button>
+      <div class="month-label"><small>Vardiya Takvimi</small><span id="monthLabel"></span></div>
+      <button class="navbtn" id="nextMonth">&#8250;</button>
+    </div>
+
+    <div class="legend">
+      <span><i class="dot" style="background:var(--gece)"></i>Gece</span>
+      <span><i class="dot" style="background:var(--dort)"></i>Dört</span>
+      <span><i class="dot" style="background:var(--gunduz)"></i>Gündüz</span>
+      <span><i class="dot" style="background:var(--rest)"></i>HT</span>
+      <span><i class="dot" style="background:var(--hat)"></i>Hat görevi</span>
+    </div>
+
+    <div class="grid7" id="dowRow"></div>
+    <div class="grid7" id="calGrid" style="margin-top:6px;"></div>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     AYARLAR / VERİ SAKLAMA
+  ============================================================ */
+  var STORAGE_KEY = 'erdemirVardiyaSettings_v1';
+  var defaultSettings = {
+    personnel: ["Berke Aygün","Tarık Yıldırım","Fatih Karaduman","Abdullah Tuna","Sabri Can Yeşiltaş","Burak Özdemir"],
+    vardiyaRef: "2026-06-15",   // Gece vardiyası 1. gün
+    gorevRef: "2026-08-18",     // ilk Yağ görevi referansı (6. hat günü tablosu)
+    htOverrides: [],            // ["YYYY-MM-DD", ...] - amirlerin duyurduğu yeni/erken HT günleri
+    currentPerson: null         // index içine personel adı ya da "__GROUP__"
+  };
+
+  function loadSettings(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        return Object.assign({}, defaultSettings, parsed);
+      }
+    }catch(e){ /* localStorage yoksa (ör. file:// iOS) bellekte devam */ }
+    return Object.assign({}, defaultSettings);
+  }
+  function saveSettings(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.settings)); }catch(e){}
+  }
+
+  var state = { settings: loadSettings(), viewYear:null, viewMonth:null };
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  state.viewYear = today.getFullYear();
+  state.viewMonth = today.getMonth();
+
+  /* ============================================================
+     VARDİYA / GÖREV HESAPLAMA MOTORU
+  ============================================================ */
+  var TASK_NAMES = {Y:'Yağ',P:'Paket',S:'Sıkma',K:'Konveyör',A:'Arka',"6":'Hat 6'};
+  var MASTER_ORDER = ['Y','P','S','K','A','6'];
+  // sıra 1..6 için görev, hat günü tablo 1..6 (index0 = 1.hat günü tablosu)
+  var TABLES = [
+    ['P','A','K','S','6','Y'],
+    ['S','6','A','K','Y','P'],
+    ['K','Y','6','A','P','S'],
+    ['A','P','Y','6','S','K'],
+    ['6','S','P','Y','K','A'],
+    ['Y','K','S','P','A','6']
+  ];
+  var SHIFT_SEQUENCE = ['Gece','Dört','Gündüz'];
+
+  function parseISO(s){ var p=s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function isoStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function addDays(date,n){ var d=new Date(date); d.setDate(d.getDate()+n); return d; }
+  function refDate(){ return parseISO(state.settings.vardiyaRef); }
+  function anchorDate(){ return parseISO(state.settings.gorevRef); }
+  function daysDiff(a,b){ return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) - Date.UTC(a.getFullYear(),a.getMonth(),a.getDate()))/86400000); }
+
+  // HT değişikliği kayıtları {date, flipFromDay} biçiminde: flipFromDay dolu ise
+  // o bloğun YALNIZCA o günden itibaren (dahil) Hat/Saha sırası tersine çevrilir;
+  // önceki günler normal sırasında kalır. Eski sürümden kalma düz metin/boolean
+  // kayıtlarla geriye dönük uyumludur.
+  function normalizedOverrides(){
+    return (state.settings.htOverrides || []).map(function(o){
+      if(typeof o === 'string') return {date:o, flipFromDay:null};
+      var ffd = null;
+      if(o.flipFromDay){ ffd = +o.flipFromDay; }
+      else if(o.flip){ ffd = 1; } // eski boolean kayıt: tüm blok tersine
+      return {date:o.date, flipFromDay: ffd};
+    }).filter(function(o){ return !!o.date; });
+  }
+  function sortedOverrides(){
+    var arr = normalizedOverrides();
+    arr.sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+    return arr.map(function(o){ return {dateObj: parseISO(o.date), flipFromDay: o.flipFromDay}; });
+  }
+
+  // Bir bloğun belirli bir günü Hat mı Saha mı? flipFromDay doluysa ve blockDay ondan
+  // büyük ya da eşitse sıra tersine döner, öncesi normal kalır.
+  function isHatDay(shiftType, blockDay, flipFromDay){
+    var base = (shiftType === 'Gündüz') ? (blockDay % 2 === 1) : (blockDay % 2 === 0);
+    if(flipFromDay && blockDay >= flipFromDay) return !base;
+    return base;
+  }
+
+  // ---- Blok tabanlı vardiya takvimi (HT değişikliklerini/kısa dönüşleri destekler) ----
+  // Vardiya referans tarihinden başlayarak 6 çalışma günü + 1 HT gününden oluşan bloklar
+  // üretir. Bir "hafta tatili değişikliği" o bloğun normal 6. gününden ÖNCE düşüyorsa,
+  // blok o tarihte erken biter (kısa dönüş) ve bir sonraki blok ondan hemen sonra,
+  // vardiya sırasında (Gece→Dört→Gündüz→Gece...) bir adım ileri giderek başlar.
+  // Bu sayede HT değişiminden ÖNCEKİ tüm tarihler birebir aynı kalır.
+  var scheduleCache = null;
+  function buildScheduleUntil(targetDate){
+    var overrides = sortedOverrides();
+    var cacheKey = state.settings.vardiyaRef + '|' + JSON.stringify(state.settings.htOverrides||[]);
+    if(scheduleCache && scheduleCache.key === cacheKey && scheduleCache.builtUntil >= +targetDate){
+      return scheduleCache.blocks;
+    }
+    var blocks = [];
+    var usedIdx = 0;
+    var shiftIdx = 0;
+    var curStart = refDate();
+    var safety = 0;
+    while(curStart <= targetDate && safety < 8000){
+      safety++;
+      var normalHt = addDays(curStart,6);
+      var htDate = normalHt;
+      var flipFromDay = null;
+      while(usedIdx < overrides.length){
+        var od = overrides[usedIdx].dateObj;
+        var db = daysDiff(curStart, od);
+        if(db < 0){ usedIdx++; continue; } // geçmişte kalmış/kullanılamayan kayıt
+        if(db <= 5){ htDate = od; flipFromDay = overrides[usedIdx].flipFromDay; usedIdx++; break; }
+        break; // bu override bu bloğun penceresinde değil, sıradaki bloğu bekle
+      }
+      blocks.push({shiftType: SHIFT_SEQUENCE[shiftIdx], start: curStart, htDate: htDate, flipFromDay: flipFromDay});
+      shiftIdx = (shiftIdx+1) % 3;
+      curStart = addDays(htDate,1);
+    }
+    scheduleCache = {blocks: blocks, builtUntil: +curStart, key: cacheKey};
+    return blocks;
+  }
+
+  function findBlockFor(date){
+    var blocks = buildScheduleUntil(date);
+    for(var i=blocks.length-1;i>=0;i--){ if(blocks[i].start <= date) return blocks[i]; }
+    return blocks[0];
+  }
+
+  function dayInfo(date){
+    var block = findBlockFor(date);
+    var info = {shiftType: block.shiftType, isRest:false, blockDay:null, hatSaha:null};
+    if(daysDiff(date, block.htDate) === 0){ info.isRest = true; info.shiftType = null; return info; }
+    info.blockDay = daysDiff(block.start, date) + 1;
+    info.hatSaha = isHatDay(block.shiftType, info.blockDay, block.flipFromDay) ? 'Hat' : 'Saha';
+    return info;
+  }
+
+  function hatBlockDaysOf(block){
+    var len = daysDiff(block.start, block.htDate);
+    var days = [];
+    for(var bd=1; bd<=len; bd++){
+      if(isHatDay(block.shiftType, bd, block.flipFromDay)) days.push(bd);
+    }
+    return days;
+  }
+
+  // Her Hat gününe, görev rotasyon tablosunu belirlemek için ardışık bir "H" indeksi atar.
+  // Dört bloğunun son (Hat) günüyle Gündüz bloğunun ilk (Hat) günü bitişikse (aralarında
+  // sadece HT günü varsa), ikinci gün rotasyonu ilerletmez - aynı tabloyu tekrarlar.
+  function buildHatIndexMap(targetDate){
+    var blocks = buildScheduleUntil(targetDate);
+    var map = {};
+    var runningH = -1;
+    var prevBlockLastHat = null;
+    for(var bi=0; bi<blocks.length; bi++){
+      var block = blocks[bi];
+      var hatDays = hatBlockDaysOf(block);
+      var lenBlock = daysDiff(block.start, block.htDate);
+      for(var hi=0; hi<hatDays.length; hi++){
+        var bd = hatDays[hi];
+        var repeat = (hi === 0 && bd === 1 && prevBlockLastHat === true);
+        if(!repeat) runningH++;
+        map[isoStr(addDays(block.start, bd-1))] = runningH;
+      }
+      prevBlockLastHat = isHatDay(block.shiftType, lenBlock, block.flipFromDay);
+    }
+    return map;
+  }
+
+  function tableNumberFor(date){
+    var target = date > anchorDate() ? date : anchorDate();
+    var map = buildHatIndexMap(target);
+    var hDate = map[isoStr(date)];
+    var hAnchor = map[isoStr(anchorDate())];
+    if(hDate === undefined || hAnchor === undefined) return null;
+    var delta = hDate - hAnchor;
+    return (((6 - 1 + delta) % 6) + 6) % 6 + 1;
+  }
+
+  function hatOffsetGeneric(date){
+    var target = date > anchorDate() ? date : anchorDate();
+    var map = buildHatIndexMap(target);
+    var h = map[isoStr(date)];
+    if(h === undefined) return 0;
+    return ((h % 6) + 6) % 6;
+  }
+
+  function prevWorkDay(date){
+    var d = new Date(date);
+    do{ d.setDate(d.getDate()-1); } while(dayInfo(d).isRest);
+    return d;
+  }
+
+  // "Beraber vardiya tutulan grup" - E Grubu için: blockDay 1-3 => B, 4-6 => A
+  function partnerGroup(blockDay){
+    if(blockDay == null) return null;
+    return blockDay <= 3 ? 'B Grubu' : 'A Grubu';
+  }
+
+  // Tam gün analiz: personel bazlı görev/RZ atamaları döner
+  function computeDay(date){
+    var info = dayInfo(date);
+    var personnel = state.settings.personnel;
+    var n = personnel.length;
+    var result = {info:info, partner: partnerGroup(info.blockDay), people: []};
+
+    if(info.isRest){ return result; }
+
+    if(info.hatSaha === 'Hat'){
+      if(n === 6){
+        var tnum = tableNumberFor(date);
+        var table = TABLES[tnum-1];
+        for(var i=0;i<6;i++){ result.people.push({name:personnel[i], task:table[i], rz:false}); }
+        result.tableNumber = tnum;
+      } else {
+        var activeTasks = activeTasksForCount(n);
+        var offset = hatOffsetGeneric(date);
+        for(var j=0;j<n;j++){
+          var task = activeTasks[(j+offset) % activeTasks.length];
+          result.people.push({name:personnel[j], task:task, rz:false});
+        }
+      }
+    } else { // Saha
+      var rzInfo = computeRZForSahaDay(date, n);
+      for(var m=0;m<n;m++){
+        var isRZ = rzInfo.flags[m];
+        result.people.push({name:personnel[m], task:isRZ?'RZ':'Saha', rz:isRZ});
+      }
+      result.rzCarried = rzInfo.carried; // Gündüz son gün RZ -> Gece ilk gün RZ devamı mı?
+    }
+    return result;
+  }
+
+  // Bir Saha gününde kimin RZ olduğunu hesaplar.
+  // Normal kural: bir önceki çalışma günü Hat idi ve kişi tetikleyici görevi (K, 2 kişide P) yaptıysa RZ.
+  // Özel kural (madde 25): önceki çalışma günü de Saha ise (Gündüz'ün son günü -> Gece'nin ilk günü geçişi
+  // gibi), o günün kendi RZ durumu olduğu gibi devralınır.
+  function computeRZForSahaDay(date, n){
+    var personnel = state.settings.personnel;
+    var trigger = (n === 2) ? 'P' : 'K';
+    var prevD = prevWorkDay(date);
+    var prevInfo = dayInfo(prevD);
+    var flags = new Array(n).fill(false);
+
+    if(prevInfo.hatSaha === 'Hat'){
+      var prevTasksByIndex;
+      if(n === 6){
+        var ptnum = tableNumberFor(prevD);
+        prevTasksByIndex = TABLES[ptnum-1];
+      } else {
+        var pActive = activeTasksForCount(n);
+        var pOffset = hatOffsetGeneric(prevD);
+        prevTasksByIndex = [];
+        for(var k=0;k<n;k++){ prevTasksByIndex.push(pActive[(k+pOffset)%pActive.length]); }
+      }
+      for(var m=0;m<n;m++){ flags[m] = prevTasksByIndex[m] === trigger; }
+      return {flags: flags, carried: false};
+    } else if(prevInfo.hatSaha === 'Saha'){
+      var carriedFrom = computeRZForSahaDay(prevD, n);
+      return {flags: carriedFrom.flags, carried: carriedFrom.flags.some(Boolean)};
+    }
+    return {flags: flags, carried: false};
+  }
+
+  // Personel sayısına göre aktif görevler (madde 18)
+  function activeTasksForCount(n){
+    if(n>=6) return ['Y','P','S','K','A','6'];
+    if(n===5) return ['Y','P','S','K','6'];
+    if(n===4) return ['Y','P','S','K'];
+    if(n===3) return ['Y','P','K'];
+    return ['Y','P'];
+  }
+
+  /* ============================================================
+     RENDER
+  ============================================================ */
+  var DOWS = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  var MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+  function initials(name){
+    return name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  }
+
+  function renderLanding(){
+    var grid = document.getElementById('badgeGrid');
+    grid.innerHTML = '';
+    state.settings.personnel.forEach(function(name, idx){
+      var card = document.createElement('button');
+      card.className = 'id-card';
+      card.innerHTML =
+        '<div class="num">SIRA ' + String(idx+1).padStart(2,'0') + '</div>' +
+        '<div class="who"><span class="avatar">'+initials(name)+'</span>' +
+        '<div><div class="name">'+name+'</div><div class="role">E Grubu</div></div></div>';
+      card.addEventListener('click', function(){ selectPerson(name); });
+      grid.appendChild(card);
+    });
+    var groupCard = document.createElement('button');
+    groupCard.className = 'id-card group';
+    groupCard.innerHTML =
+      '<div class="num">GENEL</div>' +
+      '<div class="who"><span class="avatar">GG</span>' +
+      '<div><div class="name">Tüm Grup</div><div class="role">Herkesi birlikte gör</div></div></div>';
+    groupCard.addEventListener('click', function(){ selectPerson('__GROUP__'); });
+    grid.appendChild(groupCard);
+  }
+
+  function selectPerson(nameOrGroup){
+    state.settings.currentPerson = nameOrGroup;
+    saveSettings();
+    showCalendarScreen();
+  }
+
+  function showCalendarScreen(){
+    document.getElementById('screen-landing').classList.add('hidden');
+    document.getElementById('screen-calendar').classList.remove('hidden');
+    var cur = state.settings.currentPerson;
+    var isGroup = (cur === '__GROUP__' || !cur);
+    document.getElementById('chipAvatar').textContent = isGroup ? 'GG' : initials(cur);
+    document.getElementById('chipName').textContent = isGroup ? 'Tüm Grup' : cur.split(' ')[0];
+    renderCalendar();
+  }
+
+  function renderDow(){
+    var row = document.getElementById('dowRow');
+    row.innerHTML = '';
+    DOWS.forEach(function(d){
+      var el = document.createElement('div');
+      el.className = 'dow'; el.textContent = d;
+      row.appendChild(el);
+    });
+  }
+
+  function shiftClass(shiftType){
+    if(shiftType==='Gece') return 'gece';
+    if(shiftType==='Dört') return 'dort';
+    if(shiftType==='Gündüz') return 'gunduz';
+    return '';
+  }
+
+  function renderCalendar(){
+    renderDow();
+    var y = state.viewYear, m = state.viewMonth;
+    document.getElementById('monthLabel').textContent = MONTHS[m] + ' ' + y;
+
+    var first = new Date(y,m,1);
+    var startOffset = (first.getDay() + 6) % 7; // Pazartesi=0
+    var daysInMonth = new Date(y,m+1,0).getDate();
+
+    var grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    for(var i=0;i<startOffset;i++){
+      var empty = document.createElement('div');
+      empty.className = 'cell empty';
+      grid.appendChild(empty);
+    }
+
+    var cur = state.settings.currentPerson;
+    var isGroup = (cur === '__GROUP__' || !cur);
+
+    for(var day=1; day<=daysInMonth; day++){
+      var date = new Date(y,m,day);
+      var info = dayInfo(date);
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      var isToday = (date.getFullYear()===today.getFullYear() && date.getMonth()===today.getMonth() && date.getDate()===today.getDate());
+      if(isToday) cell.classList.add('today');
+
+      if(info.isRest){
+        cell.classList.add('rest');
+        cell.innerHTML = '<div class="datenum">'+day+'</div><div class="rest-tag">HT</div>';
+      } else {
+        var sc = shiftClass(info.shiftType);
+        cell.classList.add(sc);
+        var html = '<div class="shiftbar"></div>';
+        html += '<div class="datenum">'+day+'</div>';
+        html += '<div class="chip '+sc+'">'+info.shiftType+'</div>';
+
+        if(isGroup){
+          if(info.hatSaha === 'Hat'){
+            html += '<div class="saha-tag" style="color:var(--hat);font-weight:700;">Hat</div>';
+          } else {
+            var groupDay = computeDay(date);
+            var anyRZ = groupDay.people.some(function(p){return p.rz;});
+            html += anyRZ ? '<div class="rz-tag">Saha &middot; RZ var</div>' : '<div class="saha-tag">Saha</div>';
+          }
+        } else {
+          var dayData = computeDay(date);
+          var mine = dayData.people.filter(function(p){return p.name===cur;})[0];
+          if(mine){
+            if(mine.rz){ html += '<div class="taskcode rz">RZ</div>'; }
+            else if(info.hatSaha === 'Hat'){ html += '<div class="taskcode hat">'+mine.task+'</div>'; }
+            else { html += '<div class="saha-tag">Saha</div>'; }
+          }
+        }
+        cell.innerHTML = html;
+      }
+      cell.addEventListener('click', function(d){ return function(){ openDayDetail(d); }; }(date));
+      grid.appendChild(cell);
+    }
+  }
+
+  /* ============================================================
+     GÜN DETAY MODAL
+  ============================================================ */
+  function openDayDetail(date){
+    var info = dayInfo(date);
+    var dayData = computeDay(date);
+    var root = document.getElementById('modalRoot');
+
+    var dowNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    var dateStr = date.getDate()+' '+MONTHS[date.getMonth()]+' '+date.getFullYear()+' &middot; '+dowNames[date.getDay()];
+
+    var body = '<div class="sheet-handle"></div>';
+    body += '<h2>'+dateStr+'</h2>';
+
+    if(info.isRest){
+      body += '<div class="sub">Hafta Tatili</div>';
+      body += '<div class="info-row"><span class="k">Durum</span><span class="v">HT (dinlenme günü)</span></div>';
+    } else {
+      body += '<div class="sub">'+info.shiftType+' vardiyası &middot; '+info.blockDay+'. gün &middot; '+info.hatSaha+'</div>';
+      body += '<div class="info-row"><span class="k">Vardiya</span><span class="v">'+info.shiftType+'</span></div>';
+      body += '<div class="info-row"><span class="k">Vardiya günü</span><span class="v">'+info.blockDay+' / 6</span></div>';
+      body += '<div class="info-row"><span class="k">Durum</span><span class="v">'+info.hatSaha+'</span></div>';
+      body += '<div class="info-row"><span class="k">Beraber vardiya</span><span class="v">'+dayData.partner+'</span></div>';
+
+      body += '<table class="person-table"><thead><tr><th>Personel</th><th>Görev</th></tr></thead><tbody>';
+      dayData.people.forEach(function(p){
+        var label = p.rz ? 'RZ (Rezerve)' : (info.hatSaha==='Hat' ? (TASK_NAMES[p.task]||p.task)+' ('+p.task+')' : 'Saha');
+        body += '<tr><td>'+p.name+'</td><td>'+label+'</td></tr>';
+      });
+      body += '</tbody></table>';
+      if(dayData.rzCarried){
+        body += '<div class="hint" style="margin-top:10px;">Gündüz vardiyasının son gününde RZ oluşan personelin RZ durumu, Gece vardiyasının ilk gününde de devam ediyor.</div>';
+      }
+    }
+    body += '<button class="close-sheet" id="closeSheetBtn">Kapat</button>';
+
+    root.innerHTML = '<div class="overlay" id="overlayEl"><div class="sheet">'+body+'</div></div>';
+    document.getElementById('overlayEl').addEventListener('click', function(e){
+      if(e.target.id==='overlayEl') closeModal();
+    });
+    document.getElementById('closeSheetBtn').addEventListener('click', closeModal);
+  }
+  function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+
+  /* ============================================================
+     AYARLAR MODAL
+  ============================================================ */
+  function openSettings(){
+    var root = document.getElementById('modalRoot');
+    var s = state.settings;
+    var body = '<div class="sheet-handle"></div><h2>Ayarlar</h2><div class="sub">Personel listesi ve referans tarihleri</div>';
+    body += '<div class="settings-sheet">';
+
+    body += '<div class="field"><label>Personel (sıra önemli, 2-6 kişi)</label><div id="personRows"></div>';
+    body += '<button class="add-btn" id="addPersonBtn">+ Personel ekle</button></div>';
+
+    body += '<div class="field"><label>Vardiya referans tarihi (Gece vardiyası 1. gün)</label>';
+    body += '<input type="date" id="refVardiya" value="'+s.vardiyaRef+'"></div>';
+
+    body += '<div class="field"><label>Görev rotasyonu referans tarihi (ilk Yağ görevi)</label>';
+    body += '<input type="date" id="refGorev" value="'+s.gorevRef+'"></div>';
+
+    body += '<div class="field"><label>Hafta Tatili Değişiklikleri</label><div id="htRows"></div>';
+    body += '<button class="add-btn" id="addHtBtn">+ HT değişikliği ekle</button>';
+    body += '<div class="hint">Amirler yeni bir hafta tatili günü duyurduğunda, o ilk yeni HT gününün tarihini ekleyin. Takvim yalnızca o tarihten sonrasını kısa dönüşle yeniden hesaplar; önceki tarihler değişmez.</div></div>';
+
+    body += '<button class="save-btn" id="saveSettingsBtn">Kaydet</button>';
+    body += '<button class="switch-link" id="switchPersonLink">Kişi değiştir</button>';
+    body += '</div>';
+
+    root.innerHTML = '<div class="overlay" id="overlayEl"><div class="sheet settings-sheet-wrap">'+body+'</div></div>';
+
+    renderPersonRows(s.personnel.slice());
+    renderHtRows(normalizedOverrides());
+
+    document.getElementById('overlayEl').addEventListener('click', function(e){
+      if(e.target.id==='overlayEl') closeModal();
+    });
+    document.getElementById('addPersonBtn').addEventListener('click', function(){
+      var rows = document.getElementById('personRows');
+      var current = collectPersonRows();
+      if(current.length >= 6) return;
+      current.push('');
+      renderPersonRows(current);
+    });
+    document.getElementById('addHtBtn').addEventListener('click', function(){
+      var current = collectHtRows();
+      current.push({date:'', flipFromDay:''});
+      renderHtRows(current);
+    });
+    document.getElementById('saveSettingsBtn').addEventListener('click', function(){
+      var names = collectPersonRows().map(function(n){return n.trim();}).filter(Boolean);
+      if(names.length < 2){ alert('En az 2 personel gerekli.'); return; }
+      var htEntries = collectHtRows().filter(function(o){return o.date;});
+      state.settings.personnel = names;
+      state.settings.vardiyaRef = document.getElementById('refVardiya').value || defaultSettings.vardiyaRef;
+      state.settings.gorevRef = document.getElementById('refGorev').value || defaultSettings.gorevRef;
+      state.settings.htOverrides = htEntries;
+      if(state.settings.currentPerson !== '__GROUP__' && names.indexOf(state.settings.currentPerson) === -1){
+        state.settings.currentPerson = '__GROUP__';
+      }
+      saveSettings();
+      closeModal();
+      showCalendarScreen();
+    });
+    document.getElementById('switchPersonLink').addEventListener('click', function(){
+      closeModal();
+      goToLanding();
+    });
+  }
+
+  function renderHtRows(entries){
+    var wrap = document.getElementById('htRows');
+    wrap.innerHTML = '';
+    if(entries.length === 0){
+      wrap.innerHTML = '<div class="hint" style="margin-top:0;">Henüz eklenmiş bir değişiklik yok.</div>';
+    }
+    entries.forEach(function(entry, idx){
+      var row = document.createElement('div');
+      row.className = 'ht-row';
+      row.innerHTML =
+        '<div class="person-row">' +
+          '<input type="date" data-idx="'+idx+'" class="ht-date" value="'+(entry.date||'')+'">' +
+          '<button class="rm-btn" data-idx="'+idx+'">&times;</button>' +
+        '</div>' +
+        '<label class="flip-label">Tersine çevirme başlangıç günü (bu bloğun kaçıncı gününden itibaren Hat/Saha sırası tersine dönsün — boş bırakılırsa tersine çevirme uygulanmaz):' +
+        '<input type="number" min="1" max="6" data-idx="'+idx+'" class="ht-flipday" placeholder="ör. 3" value="'+(entry.flipFromDay||'')+'" style="width:64px;margin-top:4px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;"></label>';
+      wrap.appendChild(row);
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.rm-btn'), function(btn){
+      btn.addEventListener('click', function(){
+        var cur = collectHtRows();
+        cur.splice(+btn.getAttribute('data-idx'),1);
+        renderHtRows(cur);
+      });
+    });
+  }
+  function collectHtRows(){
+    var dateInputs = document.querySelectorAll('#htRows .ht-date');
+    var flipInputs = document.querySelectorAll('#htRows .ht-flipday');
+    return Array.prototype.map.call(dateInputs, function(inp, i){
+      return {date: inp.value, flipFromDay: flipInputs[i] ? flipInputs[i].value : ''};
+    });
+  }
+
+  function renderPersonRows(names){
+    var wrap = document.getElementById('personRows');
+    wrap.innerHTML = '';
+    names.forEach(function(name, idx){
+      var row = document.createElement('div');
+      row.className = 'person-row';
+      row.innerHTML = '<input type="text" data-idx="'+idx+'" value="'+name.replace(/"/g,'&quot;')+'" placeholder="Ad Soyad">' +
+        (names.length > 2 ? '<button class="rm-btn" data-idx="'+idx+'">&times;</button>' : '');
+      wrap.appendChild(row);
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.rm-btn'), function(btn){
+      btn.addEventListener('click', function(){
+        var cur = collectPersonRows();
+        cur.splice(+btn.getAttribute('data-idx'),1);
+        renderPersonRows(cur);
+      });
+    });
+  }
+  function collectPersonRows(){
+    var inputs = document.querySelectorAll('#personRows input');
+    return Array.prototype.map.call(inputs, function(inp){ return inp.value; });
+  }
+
+  function goToLanding(){
+    document.getElementById('screen-calendar').classList.add('hidden');
+    document.getElementById('screen-landing').classList.remove('hidden');
+    renderLanding();
+  }
+
+  /* ============================================================
+     EVENTS
+  ============================================================ */
+  document.getElementById('btnSwitchPerson').addEventListener('click', goToLanding);
+  document.getElementById('btnSettings').addEventListener('click', openSettings);
+  document.getElementById('prevMonth').addEventListener('click', function(){
+    state.viewMonth--; if(state.viewMonth<0){state.viewMonth=11; state.viewYear--;}
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', function(){
+    state.viewMonth++; if(state.viewMonth>11){state.viewMonth=0; state.viewYear++;}
+    renderCalendar();
+  });
+
+  /* ============================================================
+     BAŞLAT
+  ============================================================ */
+  renderLanding();
+  if(state.settings.currentPerson){
+    showCalendarScreen();
+  }
+})();
+</script>
+</body>
+</html>

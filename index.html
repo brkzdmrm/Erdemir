@@ -13,9 +13,9 @@
     --ink:#1C232B;
     --ink-muted:#6B7480;
     --line:#E1E4E8;
-    --gece:#2E4374;      --gece-soft:#E9ECF6;
-    --dort:#B5652E;      --dort-soft:#FBEEE3;
-    --gunduz:#1E7A8C;    --gunduz-soft:#E4F3F5;
+    --gece:#A63368;      --gece-soft:#F4E4EC;
+    --dort:#3EA55E;      --dort-soft:#E5F5EA;
+    --gunduz:#3E82F1;    --gunduz-soft:#E7EFFD;
     --rest:#9AA1AC;      --rest-soft:#EDEFF1;
     --hat:#C98A2B;       --hat-soft:#FBF0DC;
     --saha:#4C5B73;      --saha-soft:#EAEDF1;
@@ -31,7 +31,7 @@
     font-family:'Inter',system-ui,sans-serif;
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:40px;
+    padding-bottom:calc(78px + env(safe-area-inset-bottom));
   }
   h1,h2,h3,.disp{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.2px;}
   .mono{font-family:'JetBrains Mono',monospace;}
@@ -102,53 +102,52 @@
   .id-card.group .avatar{background:var(--hat);}
 
   /* ---------- calendar screen ---------- */
-  .wrap{max-width:640px;margin:0 auto;padding:14px 12px 10px;}
+  .wrap{max-width:640px;margin:0 auto;padding:6px 14px 10px;}
   .month-nav{
     display:flex;align-items:center;justify-content:space-between;
-    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    padding:8px 6px;margin-bottom:12px;box-shadow:var(--shadow);
+    padding:10px 0 6px;margin-bottom:2px;
   }
-  .month-nav .navbtn{background:none;border:none;font-size:20px;color:var(--ink);width:38px;height:38px;border-radius:9px;}
+  .month-nav .navbtn{background:none;border:none;font-size:30px;color:var(--ink-muted);width:46px;height:46px;border-radius:11px;}
   .month-nav .navbtn:active{background:var(--bg);}
-  .month-label{font-size:19px;text-align:center;}
-  .month-label small{display:block;font-family:'Inter';font-weight:600;font-size:11px;color:var(--ink-muted);letter-spacing:.5px;text-transform:uppercase;}
+  .month-label{font-size:34px;font-weight:700;text-align:left;line-height:1;}
+  .month-label small{display:inline-block;margin-left:8px;font-family:'Inter';font-weight:600;font-size:15px;color:var(--ink-muted);letter-spacing:0;text-transform:none;vertical-align:middle;}
 
-  .legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:12px;padding:0 2px;}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0 6px;padding:0 2px;}
   .legend span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-muted);font-weight:600;}
-  .dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
 
-  .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
-  .dow{text-align:center;font-size:10.5px;font-weight:700;color:var(--ink-muted);letter-spacing:.5px;padding-bottom:4px;text-transform:uppercase;}
+  .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .dow{text-align:center;font-size:11px;font-weight:600;color:var(--ink-muted);padding-bottom:7px;}
+  .weekrow{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px;}
+  .weekrow:last-child{border-bottom:none;}
   .cell{
-    background:var(--surface);border:1px solid var(--line);border-radius:10px;
-    min-height:64px;padding:6px 5px;position:relative;display:flex;flex-direction:column;gap:4px;
-    overflow:hidden;
+    background:transparent;border:none;border-radius:0;
+    min-height:52px;padding:3px 2px 0;position:relative;display:flex;flex-direction:column;
+    align-items:center;gap:4px;overflow:hidden;
   }
-  .cell.empty{background:transparent;border:none;}
-  .cell.rest{background:var(--rest-soft);}
-  .cell .datenum{font-size:12px;font-weight:700;color:var(--ink);}
-  .cell.rest .datenum{color:var(--ink-muted);}
-  .cell .shiftbar{position:absolute;left:0;top:0;bottom:0;width:4px;}
-  .cell.today{outline:2px solid var(--ink);outline-offset:-2px;}
+  .cell.empty{background:transparent;}
+  .cell .datenum{
+    font-size:15px;font-weight:700;color:var(--ink);width:23px;height:23px;
+    display:flex;align-items:center;justify-content:center;border-radius:50%;
+  }
+  .cell.rest .datenum{color:var(--ink-muted);font-weight:600;}
+  .cell.today .datenum{background:var(--ink);color:#fff;}
   .chip{
-    align-self:flex-start;font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;
-    text-transform:uppercase;letter-spacing:.3px;
+    width:100%;box-sizing:border-box;text-align:center;font-size:8.5px;font-weight:700;
+    padding:4px 1px;border-radius:7px;color:#fff;letter-spacing:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .taskcode{
-    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;
-    border-radius:6px;padding:1px 6px;align-self:flex-start;
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;
+    border-radius:6px;padding:1px 5px;
   }
-  .saha-tag{font-size:10px;font-weight:600;color:var(--saha);}
-  .rz-tag{font-size:10px;font-weight:700;color:var(--rz);}
-  .rest-tag{font-size:10.5px;font-weight:700;color:var(--ink-muted);margin-top:auto;}
+  .saha-tag{font-size:8px;font-weight:600;color:var(--ink-muted);}
+  .rz-tag{font-size:8px;font-weight:700;color:var(--rz);}
+  .rest-tag{display:none;}
 
-  .cell.gece .shiftbar{background:var(--gece);}
-  .cell.dort .shiftbar{background:var(--dort);}
-  .cell.gunduz .shiftbar{background:var(--gunduz);}
-
-  .chip.gece{background:var(--gece-soft);color:var(--gece);}
-  .chip.dort{background:var(--dort-soft);color:var(--dort);}
-  .chip.gunduz{background:var(--gunduz-soft);color:var(--gunduz);}
+  .chip.gece{background:var(--gece);}
+  .chip.dort{background:var(--dort);}
+  .chip.gunduz{background:var(--gunduz);}
   .taskcode.hat{background:var(--hat-soft);color:var(--hat);}
   .taskcode.rz{background:var(--rz-soft);color:var(--rz);}
 
@@ -193,6 +192,37 @@
   .save-btn{width:100%;background:var(--gece);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:700;font-size:14.5px;margin-top:6px;}
   .hint{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin-top:4px;}
   .switch-link{display:block;text-align:center;margin-top:18px;color:var(--gece);font-weight:600;font-size:13.5px;background:none;border:none;width:100%;padding:8px;}
+
+  /* ---------- bottom tab bar ---------- */
+  .bottomnav{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    display:flex;align-items:flex-start;justify-content:space-around;
+    background:var(--surface);border-top:1px solid var(--line);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .navtab{
+    background:none;border:none;flex:1;display:flex;flex-direction:column;align-items:center;
+    gap:3px;color:var(--ink-muted);font-size:11px;font-weight:600;padding:4px 2px;border-radius:12px;
+  }
+  .navtab svg{display:block;}
+  .navtab.active{color:var(--ink);}
+  .navtab .navtab-pill{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    border-radius:14px;padding:6px 14px 5px;margin-top:-6px;
+  }
+  .navtab.active .navtab-pill{background:var(--bg);}
+
+  /* ---------- placeholder screens ---------- */
+  .placeholder-screen{min-height:100vh;}
+  .placeholder-body{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:60px 30px;color:var(--ink-muted);gap:14px;
+  }
+  .placeholder-icon{
+    width:64px;height:64px;border-radius:50%;background:var(--surface);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-muted);
+  }
+  .placeholder-body p{font-size:14px;font-weight:600;margin:0;}
 </style>
 </head>
 <body>
@@ -218,9 +248,11 @@
 
   <div class="wrap">
     <div class="month-nav">
-      <button class="navbtn" id="prevMonth">&#8249;</button>
-      <div class="month-label"><small>Vardiya Takvimi</small><span id="monthLabel"></span></div>
-      <button class="navbtn" id="nextMonth">&#8250;</button>
+      <div class="month-label"><span id="monthLabel"></span><small id="yearLabel"></small></div>
+      <div style="display:flex;">
+        <button class="navbtn" id="prevMonth">&#8249;</button>
+        <button class="navbtn" id="nextMonth">&#8250;</button>
+      </div>
     </div>
 
     <div class="legend">
@@ -232,8 +264,73 @@
     </div>
 
     <div class="grid7" id="dowRow"></div>
-    <div class="grid7" id="calGrid" style="margin-top:6px;"></div>
+    <div id="calGrid" style="margin-top:2px;"></div>
   </div>
+</div>
+
+<!-- ============ PLACEHOLDER SCREENS (yakında dolduracağız) ============ -->
+<div id="screen-reports" class="hidden placeholder-screen">
+  <div class="topbar">
+    <div class="brand"><small>Erdemir 2. Soğuk CAL</small>Raporlar</div>
+  </div>
+  <div class="placeholder-body">
+    <div class="placeholder-icon">
+      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="3.6" height="10" rx="1"/><rect x="10.2" y="6" width="3.6" height="14" rx="1"/><rect x="16.4" y="13" width="3.6" height="7" rx="1"/></svg>
+    </div>
+    <p>Raporlar yakında burada olacak.</p>
+  </div>
+</div>
+
+<div id="screen-mesailer" class="hidden placeholder-screen">
+  <div class="topbar">
+    <div class="brand"><small>Erdemir 2. Soğuk CAL</small>Mesailer</div>
+  </div>
+  <div class="placeholder-body">
+    <div class="placeholder-icon">
+      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v4h4"/><path d="M8 12h8M8 15.5h8M8 9h4"/></svg>
+    </div>
+    <p>Mesailer yakında burada olacak.</p>
+  </div>
+</div>
+
+<div id="screen-more" class="hidden placeholder-screen">
+  <div class="topbar">
+    <div class="brand"><small>Erdemir 2. Soğuk CAL</small>Daha fazla</div>
+  </div>
+  <div class="placeholder-body">
+    <div class="placeholder-icon">
+      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="15" cy="7" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="9" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="17" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
+    </div>
+    <p>Daha fazla seçenek yakında burada olacak.</p>
+  </div>
+</div>
+
+<!-- ============ ALT MENÜ (BOTTOM TAB BAR) ============ -->
+<div id="bottomNav" class="hidden bottomnav">
+  <button class="navtab active" id="tabTakvim" data-tab="takvim">
+    <span class="navtab-pill">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><line x1="3.5" y1="9.5" x2="20.5" y2="9.5"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+      <span>Takvim</span>
+    </span>
+  </button>
+  <button class="navtab" id="tabRaporlar" data-tab="raporlar">
+    <span class="navtab-pill">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="3.6" height="10" rx="1"/><rect x="10.2" y="6" width="3.6" height="14" rx="1"/><rect x="16.4" y="13" width="3.6" height="7" rx="1"/></svg>
+      <span>Raporlar</span>
+    </span>
+  </button>
+  <button class="navtab" id="tabMesailer" data-tab="mesailer">
+    <span class="navtab-pill">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v4h4"/><path d="M8 12h8M8 15.5h8M8 9h4"/></svg>
+      <span>Mesailer</span>
+    </span>
+  </button>
+  <button class="navtab" id="tabDahaFazla" data-tab="dahafazla">
+    <span class="navtab-pill">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="15" cy="7" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="9" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="17" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
+      <span>Daha fazla</span>
+    </span>
+  </button>
 </div>
 
 <div id="modalRoot"></div>
@@ -334,7 +431,7 @@
   function buildScheduleUntil(targetDate){
     var overrides = sortedOverrides();
     var cacheKey = state.settings.vardiyaRef + '|' + JSON.stringify(state.settings.htOverrides||[]);
-    if(scheduleCache && scheduleCache.key === cacheKey && scheduleCache.builtUntil >= +targetDate){
+    if(scheduleCache && scheduleCache.key === cacheKey && scheduleCache.builtUntil > +targetDate){
       return scheduleCache.blocks;
     }
     var blocks = [];
@@ -363,7 +460,8 @@
   }
 
   function findBlockFor(date){
-    var blocks = buildScheduleUntil(date);
+    var target = date > refDate() ? date : refDate();
+    var blocks = buildScheduleUntil(target);
     for(var i=blocks.length-1;i>=0;i--){ if(blocks[i].start <= date) return blocks[i]; }
     return blocks[0];
   }
@@ -451,7 +549,7 @@
     if(info.hatSaha === 'Hat'){
       if(n === 6){
         var tnum = tableNumberFor(date);
-        var table = TABLES[tnum-1];
+        var table = TABLES[(tnum||1)-1];
         for(var i=0;i<6;i++){ result.people.push({name:personnel[i], task:table[i], rz:false}); }
         result.tableNumber = tnum;
       } else {
@@ -488,7 +586,7 @@
       var prevTasksByIndex;
       if(n === 6){
         var ptnum = tableNumberFor(prevD);
-        prevTasksByIndex = TABLES[ptnum-1];
+        prevTasksByIndex = TABLES[(ptnum||1)-1];
       } else {
         var pActive = activeTasksForCount(n);
         var pOffset = hatOffsetGeneric(prevD);
@@ -516,7 +614,7 @@
   /* ============================================================
      RENDER
   ============================================================ */
-  var DOWS = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  var DOWS = ['P','S','Ç','P','C','C','P'];
   var MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 
   function initials(name){
@@ -555,12 +653,41 @@
   function showCalendarScreen(){
     document.getElementById('screen-landing').classList.add('hidden');
     document.getElementById('screen-calendar').classList.remove('hidden');
+    document.getElementById('bottomNav').classList.remove('hidden');
+    switchTab('takvim');
     var cur = state.settings.currentPerson;
     var isGroup = (cur === '__GROUP__' || !cur);
     document.getElementById('chipAvatar').textContent = isGroup ? 'GG' : initials(cur);
     document.getElementById('chipName').textContent = isGroup ? 'Tüm Grup' : cur.split(' ')[0];
-    renderCalendar();
+    // Bazı mobil tarayıcılar, bir konteyner display:none'dan görünür hale
+    // geldiği anda içine eklenen CSS grid öğelerini doğru düzenlemiyor
+    // (takvimin eksik/yarım görünmesine yol açıyordu). Bir sonraki iki
+    // paint'e kadar bekleyip öyle render etmek bunu düzeltiyor.
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        renderCalendar();
+      });
+    });
   }
+
+  /* ---------- alt menü (bottom tab bar) ---------- */
+  var TAB_SCREENS = {
+    takvim: 'screen-calendar',
+    raporlar: 'screen-reports',
+    mesailer: 'screen-mesailer',
+    dahafazla: 'screen-more'
+  };
+  function switchTab(tabName){
+    Object.keys(TAB_SCREENS).forEach(function(key){
+      document.getElementById(TAB_SCREENS[key]).classList.toggle('hidden', key !== tabName);
+    });
+    document.querySelectorAll('.navtab').forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+    });
+  }
+  document.querySelectorAll('.navtab').forEach(function(btn){
+    btn.addEventListener('click', function(){ switchTab(btn.getAttribute('data-tab')); });
+  });
 
   function renderDow(){
     var row = document.getElementById('dowRow');
@@ -579,10 +706,54 @@
     return '';
   }
 
+  function buildCell(date, day){
+    var info = day===null ? null : dayInfo(date);
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    if(day===null){ cell.classList.add('empty'); return cell; }
+
+    var isToday = (date.getFullYear()===today.getFullYear() && date.getMonth()===today.getMonth() && date.getDate()===today.getDate());
+    if(isToday) cell.classList.add('today');
+
+    var cur = state.settings.currentPerson;
+    var isGroup = (cur === '__GROUP__' || !cur);
+
+    if(info.isRest){
+      cell.classList.add('rest');
+      cell.innerHTML = '<div class="datenum">'+day+'</div>';
+    } else {
+      var sc = shiftClass(info.shiftType);
+      cell.classList.add(sc);
+      var html = '<div class="datenum">'+day+'</div>';
+      html += '<div class="chip '+sc+'">'+info.shiftType+'</div>';
+
+      if(isGroup){
+        if(info.hatSaha === 'Hat'){
+          html += '<div class="saha-tag" style="color:var(--hat);font-weight:700;">Hat</div>';
+        } else {
+          var groupDay = computeDay(date);
+          var anyRZ = groupDay.people.some(function(p){return p.rz;});
+          if(anyRZ) html += '<div class="rz-tag">RZ var</div>';
+        }
+      } else {
+        var dayData = computeDay(date);
+        var mine = dayData.people.filter(function(p){return p.name===cur;})[0];
+        if(mine){
+          if(mine.rz){ html += '<div class="taskcode rz">RZ</div>'; }
+          else if(info.hatSaha === 'Hat'){ html += '<div class="taskcode hat">'+mine.task+'</div>'; }
+        }
+      }
+      cell.innerHTML = html;
+    }
+    cell.addEventListener('click', function(){ openDayDetail(date); });
+    return cell;
+  }
+
   function renderCalendar(){
     renderDow();
     var y = state.viewYear, m = state.viewMonth;
-    document.getElementById('monthLabel').textContent = MONTHS[m] + ' ' + y;
+    document.getElementById('monthLabel').textContent = MONTHS[m];
+    document.getElementById('yearLabel').textContent = y;
 
     var first = new Date(y,m,1);
     var startOffset = (first.getDay() + 6) % 7; // Pazartesi=0
@@ -591,54 +762,32 @@
     var grid = document.getElementById('calGrid');
     grid.innerHTML = '';
 
-    for(var i=0;i<startOffset;i++){
-      var empty = document.createElement('div');
-      empty.className = 'cell empty';
-      grid.appendChild(empty);
+    var weekRow = null;
+    var cellCount = 0;
+
+    function newWeekRow(){
+      var wr = document.createElement('div');
+      wr.className = 'weekrow grid7';
+      grid.appendChild(wr);
+      return wr;
     }
 
-    var cur = state.settings.currentPerson;
-    var isGroup = (cur === '__GROUP__' || !cur);
+    weekRow = newWeekRow();
+    for(var i=0;i<startOffset;i++){
+      weekRow.appendChild(buildCell(null,null));
+      cellCount++;
+    }
 
     for(var day=1; day<=daysInMonth; day++){
+      if(cellCount>0 && cellCount%7===0){ weekRow = newWeekRow(); }
       var date = new Date(y,m,day);
-      var info = dayInfo(date);
-      var cell = document.createElement('div');
-      cell.className = 'cell';
-      var isToday = (date.getFullYear()===today.getFullYear() && date.getMonth()===today.getMonth() && date.getDate()===today.getDate());
-      if(isToday) cell.classList.add('today');
+      weekRow.appendChild(buildCell(date, day));
+      cellCount++;
+    }
 
-      if(info.isRest){
-        cell.classList.add('rest');
-        cell.innerHTML = '<div class="datenum">'+day+'</div><div class="rest-tag">HT</div>';
-      } else {
-        var sc = shiftClass(info.shiftType);
-        cell.classList.add(sc);
-        var html = '<div class="shiftbar"></div>';
-        html += '<div class="datenum">'+day+'</div>';
-        html += '<div class="chip '+sc+'">'+info.shiftType+'</div>';
-
-        if(isGroup){
-          if(info.hatSaha === 'Hat'){
-            html += '<div class="saha-tag" style="color:var(--hat);font-weight:700;">Hat</div>';
-          } else {
-            var groupDay = computeDay(date);
-            var anyRZ = groupDay.people.some(function(p){return p.rz;});
-            html += anyRZ ? '<div class="rz-tag">Saha &middot; RZ var</div>' : '<div class="saha-tag">Saha</div>';
-          }
-        } else {
-          var dayData = computeDay(date);
-          var mine = dayData.people.filter(function(p){return p.name===cur;})[0];
-          if(mine){
-            if(mine.rz){ html += '<div class="taskcode rz">RZ</div>'; }
-            else if(info.hatSaha === 'Hat'){ html += '<div class="taskcode hat">'+mine.task+'</div>'; }
-            else { html += '<div class="saha-tag">Saha</div>'; }
-          }
-        }
-        cell.innerHTML = html;
-      }
-      cell.addEventListener('click', function(d){ return function(){ openDayDetail(d); }; }(date));
-      grid.appendChild(cell);
+    while(cellCount%7!==0){
+      weekRow.appendChild(buildCell(null,null));
+      cellCount++;
     }
   }
 
@@ -812,6 +961,10 @@
 
   function goToLanding(){
     document.getElementById('screen-calendar').classList.add('hidden');
+    document.getElementById('screen-reports').classList.add('hidden');
+    document.getElementById('screen-mesailer').classList.add('hidden');
+    document.getElementById('screen-more').classList.add('hidden');
+    document.getElementById('bottomNav').classList.add('hidden');
     document.getElementById('screen-landing').classList.remove('hidden');
     renderLanding();
   }

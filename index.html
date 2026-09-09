@@ -190,8 +190,39 @@
   .rm-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--rz);font-weight:700;}
   .add-btn{width:100%;border:1px dashed var(--line);border-radius:10px;padding:10px;background:none;color:var(--ink-muted);font-weight:600;font-size:13.5px;}
   .save-btn{width:100%;background:var(--gece);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:700;font-size:14.5px;margin-top:6px;}
+  .cancel-btn{width:100%;background:none;color:var(--ink-muted);border:1px solid var(--line);border-radius:12px;padding:13px;font-weight:700;font-size:14.5px;margin-top:6px;}
+  .acc-btn-row{display:flex;gap:8px;margin-top:14px;}
+  .acc-btn-row .save-btn,.acc-btn-row .cancel-btn{margin-top:0;flex:1;}
   .hint{font-size:11.5px;color:var(--ink-muted);line-height:1.5;margin-top:4px;}
   .switch-link{display:block;text-align:center;margin-top:18px;color:var(--gece);font-weight:600;font-size:13.5px;background:none;border:none;width:100%;padding:8px;}
+
+  /* ---------- ayarlar akordeonu (Daha fazla) ---------- */
+  .accordion{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px;background:var(--surface);}
+  .accordion-head{
+    width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:15px 16px;background:none;border:none;text-align:left;font-size:15px;font-weight:700;color:var(--ink);
+  }
+  .accordion-head .chev{color:var(--ink-muted);font-size:13px;transition:transform .15s ease;flex:0 0 auto;}
+  .accordion.open .accordion-head .chev{transform:rotate(90deg);}
+  .accordion-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line);padding-top:14px;}
+  .accordion.open .accordion-body{display:block;}
+
+  /* ---------- raporlar (takvim görünümlü PDF) ---------- */
+  .report-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin:0 0 10px;}
+  .report-dow-row{margin-bottom:2px;}
+  .report-grid-person .cell{min-height:64px;}
+  .report-grid-group .cell{min-height:96px;}
+  .report-group-tasks{width:100%;font-size:7px;line-height:1.35;color:var(--ink-muted);text-align:left;padding:0 2px;}
+  .report-group-tasks div{display:flex;justify-content:space-between;gap:3px;}
+  .report-group-tasks b{color:var(--ink);font-weight:700;}
+  .report-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:12px;font-size:11px;color:var(--ink-muted);}
+  .report-legend b{color:var(--ink);}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{position:absolute;top:0;left:0;width:100%;}
+    @page{ size:landscape; margin:10mm; }
+  }
 
   /* ---------- bottom tab bar ---------- */
   .bottomnav{
@@ -237,13 +268,12 @@
 <!-- ============ CALENDAR ============ -->
 <div id="screen-calendar" class="hidden">
   <div class="topbar">
-    <button class="person-chip" id="btnSwitchPerson">
+    <div class="person-chip" id="btnSwitchPerson">
       <span class="avatar" id="chipAvatar">EG</span>
       <span id="chipName">Grup</span>
-    </button>
+    </div>
     <div class="brand"><small>Erdemir 2. Soğuk CAL</small>E Grubu</div>
     <div class="spacer"></div>
-    <button class="icon-btn" id="btnSettings">&#9881;</button>
   </div>
 
   <div class="wrap">
@@ -273,12 +303,7 @@
   <div class="topbar">
     <div class="brand"><small>Erdemir 2. Soğuk CAL</small>Raporlar</div>
   </div>
-  <div class="placeholder-body">
-    <div class="placeholder-icon">
-      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="3.6" height="10" rx="1"/><rect x="10.2" y="6" width="3.6" height="14" rx="1"/><rect x="16.4" y="13" width="3.6" height="7" rx="1"/></svg>
-    </div>
-    <p>Raporlar yakında burada olacak.</p>
-  </div>
+  <div class="wrap" id="reportsContent"></div>
 </div>
 
 <div id="screen-mesailer" class="hidden placeholder-screen">
@@ -297,12 +322,7 @@
   <div class="topbar">
     <div class="brand"><small>Erdemir 2. Soğuk CAL</small>Daha fazla</div>
   </div>
-  <div class="placeholder-body">
-    <div class="placeholder-icon">
-      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="15" cy="7" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="9" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="17" cy="17" r="2" fill="currentColor" stroke="none"/></svg>
-    </div>
-    <p>Daha fazla seçenek yakında burada olacak.</p>
-  </div>
+  <div class="wrap" id="moreContent"></div>
 </div>
 
 <!-- ============ ALT MENÜ (BOTTOM TAB BAR) ============ -->
@@ -346,8 +366,10 @@
   var defaultSettings = {
     personnel: ["Berke Aygün","Tarık Yıldırım","Fatih Karaduman","Abdullah Tuna","Sabri Can Yeşiltaş","Burak Özdemir"],
     vardiyaRef: "2026-06-15",   // Gece vardiyası 1. gün
-    gorevRef: "2026-08-18",     // ilk Yağ görevi referansı (6. hat günü tablosu)
-    htOverrides: [],            // ["YYYY-MM-DD", ...] - amirlerin duyurduğu yeni/erken HT günleri
+    gorevRef: "2026-09-03",     // Hat görev referansı (6. hat günü tablosu) - 3 Eylül 2026, kısa dönüşle bağlantılı Hat günü
+    gorevAnchorAssignment: ['P','K','6','S','A','Y'], // gorevRef (3 Eylül 2026) gününde personel[i]'nin görevi: Berke-Paket, Tarık-Konveyör, Fatih-Hat6, Abdullah-Sıkma, Sabri Can-Arka, Burak-Yağ
+    taskCycleOrder: ['Y','P','S','6','K','A'], // Yağ→Paket→Sıkma→Hat6→Konveyör→Arka→(tekrar Yağ)
+    htOverrides: [{date:"2026-09-05", flipFromDay:4}], // 5 Eylül 2026'da kısa dönüş (erken HT + 4. günden itibaren Hat/Saha ters döndü); 6 Eylül 2026 yeni Gece vardiyası 1. günü oldu. Bu tarihten ÖNCEKİ tüm günler değişmedi.
     currentPerson: null         // index içine personel adı ya da "__GROUP__"
   };
 
@@ -375,16 +397,21 @@
      VARDİYA / GÖREV HESAPLAMA MOTORU
   ============================================================ */
   var TASK_NAMES = {Y:'Yağ',P:'Paket',S:'Sıkma',K:'Konveyör',A:'Arka',"6":'Hat 6'};
-  var MASTER_ORDER = ['Y','P','S','K','A','6'];
-  // sıra 1..6 için görev, hat günü tablo 1..6 (index0 = 1.hat günü tablosu)
-  var TABLES = [
-    ['P','A','K','S','6','Y'],
-    ['S','6','A','K','Y','P'],
-    ['K','Y','6','A','P','S'],
-    ['A','P','Y','6','S','K'],
-    ['6','S','P','Y','K','A'],
-    ['Y','K','S','P','A','6']
-  ];
+  // Görev döngü sırası: her hat gününde bir kişinin bir sonraki hat gününde
+  // hangi göreve geçeceğini belirler (ayarlardan değiştirilebilir).
+  function masterOrder(){ return state.settings.taskCycleOrder || defaultSettings.taskCycleOrder; }
+  // Tablo(1..6): görev rotasyonu referans tarihi (gorevRef) her zaman tablo 6'ya denk gelir.
+  // gorevAnchorAssignment, o tarihte personel[i]'nin görevini tutar (ayarlardan değiştirilebilir).
+  // Diğer tüm tablolar buradan matematiksel olarak türetilir (madde 18 dönüşüm mantığı korunur).
+  function tableForNumber(tnum){
+    var order = masterOrder();
+    var anchor = state.settings.gorevAnchorAssignment || defaultSettings.gorevAnchorAssignment;
+    return anchor.map(function(task){
+      var idx = order.indexOf(task);
+      if(idx === -1) idx = 0;
+      return order[(idx + tnum) % 6];
+    });
+  }
   var SHIFT_SEQUENCE = ['Gece','Dört','Gündüz'];
 
   function parseISO(s){ var p=s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
@@ -549,7 +576,7 @@
     if(info.hatSaha === 'Hat'){
       if(n === 6){
         var tnum = tableNumberFor(date);
-        var table = TABLES[(tnum||1)-1];
+        var table = tableForNumber(tnum||1);
         for(var i=0;i<6;i++){ result.people.push({name:personnel[i], task:table[i], rz:false}); }
         result.tableNumber = tnum;
       } else {
@@ -586,7 +613,7 @@
       var prevTasksByIndex;
       if(n === 6){
         var ptnum = tableNumberFor(prevD);
-        prevTasksByIndex = TABLES[(ptnum||1)-1];
+        prevTasksByIndex = tableForNumber(ptnum||1);
       } else {
         var pActive = activeTasksForCount(n);
         var pOffset = hatOffsetGeneric(prevD);
@@ -684,6 +711,8 @@
     document.querySelectorAll('.navtab').forEach(function(btn){
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
     });
+    if(tabName === 'dahafazla') renderMoreScreen();
+    if(tabName === 'raporlar') renderReportsScreen();
   }
   document.querySelectorAll('.navtab').forEach(function(btn){
     btn.addEventListener('click', function(){ switchTab(btn.getAttribute('data-tab')); });
@@ -836,41 +865,206 @@
   function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
 
   /* ============================================================
-     AYARLAR MODAL
+     RAPORLAR (AYLIK, TAKVİM GÖRÜNÜMLÜ PDF)
   ============================================================ */
-  function openSettings(){
-    var root = document.getElementById('modalRoot');
+  var reportState = { year: null, month: null };
+
+  function renderReportsScreen(){
+    var root = document.getElementById('reportsContent');
     var s = state.settings;
-    var body = '<div class="sheet-handle"></div><h2>Ayarlar</h2><div class="sub">Personel listesi ve referans tarihleri</div>';
-    body += '<div class="settings-sheet">';
+    if(reportState.year === null){
+      reportState.year = state.viewYear;
+      reportState.month = state.viewMonth;
+    }
 
-    body += '<div class="field"><label>Personel (sıra önemli, 2-6 kişi)</label><div id="personRows"></div>';
-    body += '<button class="add-btn" id="addPersonBtn">+ Personel ekle</button></div>';
+    var html = '<div class="settings-sheet">';
+    html += '<div class="field"><label>Kişi / Grup</label><select id="reportPerson">';
+    html += '<option value="__GROUP__">Tüm Grup</option>';
+    s.personnel.forEach(function(name){ html += '<option value="'+name+'">'+name+'</option>'; });
+    html += '</select></div>';
+    html += '</div>';
 
-    body += '<div class="field"><label>Vardiya referans tarihi (Gece vardiyası 1. gün)</label>';
-    body += '<input type="date" id="refVardiya" value="'+s.vardiyaRef+'"></div>';
+    html += '<div class="month-nav" style="margin-top:2px;">';
+    html += '<div class="month-label"><span id="reportMonthLabel"></span><small id="reportYearLabel"></small></div>';
+    html += '<div style="display:flex;">';
+    html += '<button class="navbtn" id="reportPrevMonth">&#8249;</button>';
+    html += '<button class="navbtn" id="reportNextMonth">&#8250;</button>';
+    html += '</div></div>';
 
-    body += '<div class="field"><label>Görev rotasyonu referans tarihi (ilk Yağ görevi)</label>';
-    body += '<input type="date" id="refGorev" value="'+s.gorevRef+'"></div>';
+    html += '<button class="save-btn" id="generateReportBtn" style="margin-top:14px;">Rapor Oluştur</button>';
 
-    body += '<div class="field"><label>Hafta Tatili Değişiklikleri</label><div id="htRows"></div>';
-    body += '<button class="add-btn" id="addHtBtn">+ HT değişikliği ekle</button>';
-    body += '<div class="hint">Amirler yeni bir hafta tatili günü duyurduğunda, o ilk yeni HT gününün tarihini ekleyin. Takvim yalnızca o tarihten sonrasını kısa dönüşle yeniden hesaplar; önceki tarihler değişmez.</div></div>';
+    html += '<div id="reportPreviewWrap" class="hidden" style="margin-top:18px;">';
+    html += '<div id="printArea"></div>';
+    html += '<button class="save-btn" id="printReportBtn" style="margin-top:14px;">Yazdır / PDF Olarak Kaydet</button>';
+    html += '<div class="hint" style="margin-top:8px;">Açılan yazdırma önizlemesinde paylaş simgesine dokunup "Dosyalara Kaydet" seçeneğiyle PDF olarak kaydedebilirsin.</div>';
+    html += '</div>';
 
-    body += '<button class="save-btn" id="saveSettingsBtn">Kaydet</button>';
-    body += '<button class="switch-link" id="switchPersonLink">Kişi değiştir</button>';
-    body += '</div>';
+    root.innerHTML = html;
+    updateReportMonthLabel();
 
-    root.innerHTML = '<div class="overlay" id="overlayEl"><div class="sheet settings-sheet-wrap">'+body+'</div></div>';
+    document.getElementById('reportPrevMonth').addEventListener('click', function(){
+      reportState.month--; if(reportState.month<0){reportState.month=11; reportState.year--;}
+      updateReportMonthLabel();
+    });
+    document.getElementById('reportNextMonth').addEventListener('click', function(){
+      reportState.month++; if(reportState.month>11){reportState.month=0; reportState.year++;}
+      updateReportMonthLabel();
+    });
+    document.getElementById('generateReportBtn').addEventListener('click', function(){
+      var person = document.getElementById('reportPerson').value;
+      buildReportCalendar(reportState.year, reportState.month, person);
+      document.getElementById('reportPreviewWrap').classList.remove('hidden');
+    });
+    document.getElementById('printReportBtn').addEventListener('click', function(){
+      window.print();
+    });
+  }
+
+  function updateReportMonthLabel(){
+    var lbl = document.getElementById('reportMonthLabel');
+    var ylbl = document.getElementById('reportYearLabel');
+    if(!lbl) return;
+    lbl.textContent = MONTHS[reportState.month];
+    ylbl.textContent = reportState.year;
+  }
+
+  function reportDayCellHtml(date, isGroup, person, personnel){
+    var info = dayInfo(date);
+    var html = '<div class="cell'+(info.isRest ? ' rest' : '')+'">';
+    html += '<div class="datenum">'+date.getDate()+'</div>';
+    if(info.isRest){
+      html += '</div>';
+      return html;
+    }
+    var sc = shiftClass(info.shiftType);
+    html += '<div class="chip '+sc+'">'+info.shiftType+'</div>';
+    var dayData = computeDay(date);
+    if(isGroup){
+      html += '<div class="report-group-tasks">';
+      personnel.forEach(function(name){
+        var p = dayData.people.filter(function(x){return x.name===name;})[0];
+        var initials = name.split(' ').map(function(w){return w[0];}).join('');
+        html += '<div><b>'+initials+'</b> '+(p ? p.task : '—')+'</div>';
+      });
+      html += '</div>';
+    } else {
+      var mine = dayData.people.filter(function(x){return x.name===person;})[0];
+      if(mine){
+        if(mine.rz){ html += '<div class="taskcode rz">RZ</div>'; }
+        else if(info.hatSaha === 'Hat'){ html += '<div class="taskcode hat">'+mine.task+'</div>'; }
+      }
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function buildReportCalendar(year, month, person){
+    var area = document.getElementById('printArea');
+    var isGroup = (person === '__GROUP__');
+    var personnel = state.settings.personnel;
+    var title = 'E Grubu &middot; ' + MONTHS[month] + ' ' + year + ' &middot; ' + (isGroup ? 'Tüm Grup' : person);
+
+    var first = new Date(year, month, 1);
+    var startOffset = (first.getDay() + 6) % 7;
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+
+    var html = '<div class="report-title">'+title+'</div>';
+    html += '<div class="grid7 report-dow-row">';
+    DOWS.forEach(function(d){ html += '<div class="dow">'+d+'</div>'; });
+    html += '</div>';
+
+    var cellCount = 0;
+    html += '<div class="weekrow grid7'+(isGroup ? ' report-grid-group' : ' report-grid-person')+'">';
+    for(var i=0;i<startOffset;i++){ html += '<div class="cell empty"></div>'; cellCount++; }
+    for(var d=1; d<=daysInMonth; d++){
+      if(cellCount>0 && cellCount%7===0){
+        html += '</div><div class="weekrow grid7'+(isGroup ? ' report-grid-group' : ' report-grid-person')+'">';
+      }
+      html += reportDayCellHtml(new Date(year, month, d), isGroup, person, personnel);
+      cellCount++;
+    }
+    while(cellCount%7!==0){ html += '<div class="cell empty"></div>'; cellCount++; }
+    html += '</div>';
+
+    if(isGroup){
+      html += '<div class="report-legend">';
+      personnel.forEach(function(name){
+        var initials = name.split(' ').map(function(w){return w[0];}).join('');
+        html += '<span><b>'+initials+'</b> '+name+'</span>';
+      });
+      html += '</div>';
+    }
+
+    area.innerHTML = html;
+  }
+
+  /* ============================================================
+     DAHA FAZLA (AYARLAR AKORDEONU)
+  ============================================================ */
+  function accordionSection(id, title, innerHtml){
+    return '<div class="accordion" id="acc-'+id+'">' +
+      '<button class="accordion-head" data-acc="'+id+'"><span>'+title+'</span><span class="chev">&#8250;</span></button>' +
+      '<div class="accordion-body"><div class="settings-sheet">'+innerHtml+
+        '<div class="acc-btn-row">' +
+          '<button class="save-btn acc-save" data-acc="'+id+'">Kaydet</button>' +
+          '<button class="cancel-btn acc-cancel" data-acc="'+id+'">İptal</button>' +
+        '</div>' +
+      '</div></div>' +
+    '</div>';
+  }
+
+  function renderMoreScreen(){
+    var root = document.getElementById('moreContent');
+    var s = state.settings;
+
+    var personnelHtml = '<div class="field"><label>Personel (sıra önemli, 2-6 kişi)</label><div id="personRows"></div>';
+    personnelHtml += '<button class="add-btn" id="addPersonBtn">+ Personel ekle</button></div>';
+
+    var vardiyaHtml = '<div class="field"><label>Vardiya referans tarihi (Gece vardiyası 1. gün)</label>';
+    vardiyaHtml += '<input type="date" id="refVardiya" value="'+s.vardiyaRef+'"></div>';
+
+    var hatOrderHtml = '';
+    if(s.personnel.length === 6){
+      hatOrderHtml += '<div class="field"><label class="flip-label" style="margin-bottom:6px;">Referans tarihi (bu tarihte kim hangi görevdeydi):</label>';
+      hatOrderHtml += '<input type="date" id="refGorev" value="'+s.gorevRef+'" style="margin-bottom:10px;">';
+      hatOrderHtml += '<div id="taskOrderRows"></div>';
+      hatOrderHtml += '<div class="hint">Yukarıdaki tarihte her kişinin hangi görevde olduğunu seçin. Buradan değiştirirsen tüm hat günü rotasyonu buna göre yeniden hesaplanır. Seçtiğiniz tarihin gerçek bir hat günü olması ve her görevin yalnızca bir kişiye atanması gerekir.</div></div>';
+
+      hatOrderHtml += '<div class="field"><label>Görev Değişim Sırası</label>';
+      hatOrderHtml += '<div id="taskCycleRows"></div>';
+      hatOrderHtml += '<div class="hint">Bir kişi bir hat gününden sonraki hat gününe geçtiğinde görevi bu sırayla değişir (döngü halinde tekrar eder). Örn. Sıkma → Hat 6 → Konveyör istiyorsan, Sıkma\'yı seçtiğin kutunun hemen sonrasına Hat 6\'yı, onun da sonrasına Konveyör\'ü yerleştir.</div></div>';
+    } else {
+      hatOrderHtml += '<div class="field"><label>Görev rotasyonu referans tarihi (ilk Yağ görevi)</label>';
+      hatOrderHtml += '<input type="date" id="refGorev" value="'+s.gorevRef+'"></div>';
+    }
+
+    var htHtml = '<div class="field"><label>Hafta Tatili Değişiklikleri</label><div id="htRows"></div>';
+    htHtml += '<button class="add-btn" id="addHtBtn">+ HT değişikliği ekle</button>';
+    htHtml += '<div class="hint">Amirler yeni bir hafta tatili günü duyurduğunda, o ilk yeni HT gününün tarihini ekleyin. Takvim yalnızca o tarihten sonrasını kısa dönüşle yeniden hesaplar; önceki tarihler değişmez.</div></div>';
+
+    var html = '';
+    html += accordionSection('personnel', 'Personel', personnelHtml);
+    html += accordionSection('vardiya', 'Vardiya Referans Tarihi', vardiyaHtml);
+    html += accordionSection('hatgorev', 'Hat Görev Sırası', hatOrderHtml);
+    html += accordionSection('ht', 'Hafta Tatili Değişiklikleri', htHtml);
+    html += '<button class="switch-link" id="switchPersonLink">Kişi değiştir</button>';
+
+    root.innerHTML = html;
 
     renderPersonRows(s.personnel.slice());
     renderHtRows(normalizedOverrides());
+    if(s.personnel.length === 6){
+      renderTaskOrderRows(s.personnel, (s.gorevAnchorAssignment || defaultSettings.gorevAnchorAssignment).slice());
+      renderTaskCycleRows((s.taskCycleOrder || defaultSettings.taskCycleOrder).slice());
+    }
 
-    document.getElementById('overlayEl').addEventListener('click', function(e){
-      if(e.target.id==='overlayEl') closeModal();
+    document.querySelectorAll('.accordion-head').forEach(function(head){
+      head.addEventListener('click', function(){
+        document.getElementById('acc-'+head.getAttribute('data-acc')).classList.toggle('open');
+      });
     });
+
     document.getElementById('addPersonBtn').addEventListener('click', function(){
-      var rows = document.getElementById('personRows');
       var current = collectPersonRows();
       if(current.length >= 6) return;
       current.push('');
@@ -881,23 +1075,77 @@
       current.push({date:'', flipFromDay:''});
       renderHtRows(current);
     });
-    document.getElementById('saveSettingsBtn').addEventListener('click', function(){
+
+    document.querySelectorAll('.acc-cancel').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        renderMoreScreen();
+      });
+    });
+
+    document.querySelector('.acc-save[data-acc="personnel"]').addEventListener('click', function(){
       var names = collectPersonRows().map(function(n){return n.trim();}).filter(Boolean);
       if(names.length < 2){ alert('En az 2 personel gerekli.'); return; }
-      var htEntries = collectHtRows().filter(function(o){return o.date;});
       state.settings.personnel = names;
-      state.settings.vardiyaRef = document.getElementById('refVardiya').value || defaultSettings.vardiyaRef;
-      state.settings.gorevRef = document.getElementById('refGorev').value || defaultSettings.gorevRef;
-      state.settings.htOverrides = htEntries;
       if(state.settings.currentPerson !== '__GROUP__' && names.indexOf(state.settings.currentPerson) === -1){
         state.settings.currentPerson = '__GROUP__';
       }
       saveSettings();
-      closeModal();
-      showCalendarScreen();
+      renderMoreScreen();
     });
+
+    document.querySelector('.acc-save[data-acc="vardiya"]').addEventListener('click', function(){
+      state.settings.vardiyaRef = document.getElementById('refVardiya').value || defaultSettings.vardiyaRef;
+      saveSettings();
+      renderMoreScreen();
+    });
+
+    document.querySelector('.acc-save[data-acc="hatgorev"]').addEventListener('click', function(){
+      var candidateGorevRef = document.getElementById('refGorev').value || defaultSettings.gorevRef;
+      var taskOrderEl = document.getElementById('taskOrderRows');
+      var taskCycleEl = document.getElementById('taskCycleRows');
+      if(taskOrderEl){
+        var order = collectTaskOrderRows();
+        var uniqCheck = order.slice().sort().join(',');
+        if(!(order.length === 6 && uniqCheck === ['6','A','K','P','S','Y'].join(','))){
+          alert('Hat görev sırasında her görev yalnızca bir kişiye atanmalı (tekrar eden görev var).');
+          return;
+        }
+        var cycleOrder = defaultSettings.taskCycleOrder;
+        if(taskCycleEl){
+          cycleOrder = collectTaskCycleRows();
+          var cycleUniqCheck = cycleOrder.slice().sort().join(',');
+          if(!(cycleOrder.length === 6 && cycleUniqCheck === ['6','A','K','P','S','Y'].join(','))){
+            alert('Görev Değişim Sırasında her görev yalnızca bir kez yer almalı (tekrar eden görev var).');
+            return;
+          }
+        }
+        // Seçilen referans tarihinin gerçekten bir hat günü olduğunu, mevcut
+        // ayarları geçici olarak değiştirmeden (adaylarla) kontrol et.
+        var backup = {gorevRef: state.settings.gorevRef};
+        state.settings.gorevRef = candidateGorevRef;
+        var checkInfo = dayInfo(parseISO(candidateGorevRef));
+        var isValidHatDay = (!checkInfo.isRest && checkInfo.hatSaha === 'Hat');
+        state.settings.gorevRef = backup.gorevRef;
+        if(!isValidHatDay){
+          alert('Seçtiğiniz Hat Görev Sırası referans tarihi bir hat (çalışma) günü değil. Lütfen o kişilerin gerçekten hat görevinde olduğu bir tarih seçin.');
+          return;
+        }
+        state.settings.gorevAnchorAssignment = order;
+        state.settings.taskCycleOrder = cycleOrder;
+      }
+      state.settings.gorevRef = candidateGorevRef;
+      saveSettings();
+      renderMoreScreen();
+    });
+
+    document.querySelector('.acc-save[data-acc="ht"]').addEventListener('click', function(){
+      var htEntries = collectHtRows().filter(function(o){return o.date;});
+      state.settings.htOverrides = htEntries;
+      saveSettings();
+      renderMoreScreen();
+    });
+
     document.getElementById('switchPersonLink').addEventListener('click', function(){
-      closeModal();
       goToLanding();
     });
   }
@@ -936,6 +1184,52 @@
     });
   }
 
+  function renderTaskOrderRows(personnel, assignment){
+    var wrap = document.getElementById('taskOrderRows');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    var letters = ['Y','P','S','K','A','6'];
+    personnel.forEach(function(name, idx){
+      var row = document.createElement('div');
+      row.className = 'person-row';
+      var sel = '<select data-idx="'+idx+'" class="task-order-select" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:13.5px;background:var(--surface);color:var(--ink);">';
+      letters.forEach(function(letter){
+        var selected = (assignment[idx] === letter) ? ' selected' : '';
+        sel += '<option value="'+letter+'"'+selected+'>'+TASK_NAMES[letter]+'</option>';
+      });
+      sel += '</select>';
+      row.innerHTML = '<span style="flex:0 0 auto;min-width:110px;font-size:13.5px;font-weight:600;color:var(--ink);">'+name+'</span>'+sel;
+      wrap.appendChild(row);
+    });
+  }
+  function collectTaskOrderRows(){
+    var selects = document.querySelectorAll('#taskOrderRows .task-order-select');
+    return Array.prototype.map.call(selects, function(sel){ return sel.value; });
+  }
+
+  function renderTaskCycleRows(order){
+    var wrap = document.getElementById('taskCycleRows');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    var letters = ['Y','P','S','K','A','6'];
+    order.forEach(function(task, idx){
+      var row = document.createElement('div');
+      row.className = 'person-row';
+      var sel = '<select data-idx="'+idx+'" class="task-cycle-select" style="flex:1;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:13.5px;background:var(--surface);color:var(--ink);">';
+      letters.forEach(function(letter){
+        var selected = (task === letter) ? ' selected' : '';
+        sel += '<option value="'+letter+'"'+selected+'>'+TASK_NAMES[letter]+'</option>';
+      });
+      sel += '</select>';
+      row.innerHTML = '<span style="flex:0 0 auto;min-width:44px;font-size:13.5px;font-weight:700;color:var(--ink-muted);">'+(idx+1)+'.</span>'+sel;
+      wrap.appendChild(row);
+    });
+  }
+  function collectTaskCycleRows(){
+    var selects = document.querySelectorAll('#taskCycleRows .task-cycle-select');
+    return Array.prototype.map.call(selects, function(sel){ return sel.value; });
+  }
+
   function renderPersonRows(names){
     var wrap = document.getElementById('personRows');
     wrap.innerHTML = '';
@@ -972,8 +1266,6 @@
   /* ============================================================
      EVENTS
   ============================================================ */
-  document.getElementById('btnSwitchPerson').addEventListener('click', goToLanding);
-  document.getElementById('btnSettings').addEventListener('click', openSettings);
   document.getElementById('prevMonth').addEventListener('click', function(){
     state.viewMonth--; if(state.viewMonth<0){state.viewMonth=11; state.viewYear--;}
     renderCalendar();

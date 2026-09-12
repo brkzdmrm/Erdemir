@@ -179,8 +179,14 @@
   /* ---------- settings ---------- */
   .settings-sheet .field{margin-bottom:16px;}
   .settings-sheet label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
-  .settings-sheet input[type=text],.settings-sheet input[type=date],.settings-sheet select{
-    width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;font-family:inherit;background:var(--bg);
+  .settings-sheet input[type=text],.settings-sheet input[type=date],.settings-sheet input[type=number],.settings-sheet select{
+    width:100%;height:46px;padding:0 11px;border:1px solid var(--line);border-radius:10px;
+    font-size:14.5px;font-family:inherit;background:var(--bg);box-sizing:border-box;
+    -webkit-appearance:none;appearance:none;line-height:normal;vertical-align:middle;
+  }
+  .settings-sheet select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239AA1AC'><path d='M5.5 7.5l4.5 4.5 4.5-4.5z'/></svg>");
+    background-repeat:no-repeat;background-position:right 11px center;background-size:16px;padding-right:32px;
   }
   .person-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
   .ht-row{margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed var(--line);}
@@ -223,6 +229,42 @@
     #printArea{position:absolute;top:0;left:0;width:100%;}
     @page{ size:landscape; margin:10mm; }
   }
+
+  /* ---------- mesailer ---------- */
+  .mesai-summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .mesai-summary-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:10px 12px;display:flex;flex-direction:column;gap:3px;
+  }
+  .mesai-summary-card b{font-size:12.5px;color:var(--ink);}
+  .mesai-summary-card span{font-size:14px;font-weight:700;color:var(--gece);}
+  .mesai-summary-solo{grid-column:1 / -1;}
+  .mesai-suggest-row{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;
+  }
+  .mesai-suggest-row:last-child{border-bottom:none;}
+  .mesai-suggest-btn{width:auto;padding:6px 12px;font-size:12.5px;border-radius:8px;flex:0 0 auto;}
+  .mesai-log-row{
+    position:relative;padding:10px 70px 10px 0;border-bottom:1px solid var(--line);
+  }
+  .mesai-log-row:last-child{border-bottom:none;}
+  .mesai-log-main{font-size:13.5px;color:var(--ink);}
+  .mesai-log-note{font-size:12px;color:var(--ink-muted);margin-top:2px;}
+  .mesai-del-btn{
+    position:absolute;right:0;top:10px;background:none;border:1px solid var(--line);
+    color:var(--rz);font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px;
+  }
+  .mesai-add-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin-top:18px;
+  }
+  .mesai-add-card label{margin-bottom:10px;}
+  .mesai-add-card .field-row{display:flex;gap:8px;margin-bottom:10px;}
+  .mesai-add-card .field-row > *{flex:1;min-width:0;}
+  .mesai-add-card input,.mesai-add-card select{margin-bottom:10px;}
+  .mesai-add-card input:last-of-type{margin-bottom:0;}
+  .mesai-add-card .save-btn{margin-top:4px;}
 
   /* ---------- bottom tab bar ---------- */
   .bottomnav{
@@ -310,12 +352,7 @@
   <div class="topbar">
     <div class="brand"><small>Erdemir 2. Soğuk CAL</small>Mesailer</div>
   </div>
-  <div class="placeholder-body">
-    <div class="placeholder-icon">
-      <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v4h4"/><path d="M8 12h8M8 15.5h8M8 9h4"/></svg>
-    </div>
-    <p>Mesailer yakında burada olacak.</p>
-  </div>
+  <div class="wrap" id="mesailerContent"></div>
 </div>
 
 <div id="screen-more" class="hidden placeholder-screen">
@@ -363,27 +400,42 @@
      AYARLAR / VERİ SAKLAMA
   ============================================================ */
   var STORAGE_KEY = 'erdemirVardiyaSettings_v1';
+  // Koddaki vardiya/görev takvim kalibrasyonu değiştiğinde bu sayıyı artır.
+  // Telefonda daha önce kaydedilmiş eski ayarlar bu takvim alanlarını
+  // geçersiz kılmasın diye, sürüm eskiyse bu alanlar koddaki güncel
+  // değerlerle değiştirilir (personel adları ve seçili kişi gibi kişisel
+  // tercihler dokunulmadan kalır).
+  var CALIBRATION_VERSION = 3;
   var defaultSettings = {
     personnel: ["Berke Aygün","Tarık Yıldırım","Fatih Karaduman","Abdullah Tuna","Sabri Can Yeşiltaş","Burak Özdemir"],
-    vardiyaRef: "2026-06-15",   // Gece vardiyası 1. gün
-    gorevRef: "2026-09-03",     // Hat görev referansı (6. hat günü tablosu) - 3 Eylül 2026, kısa dönüşle bağlantılı Hat günü
-    gorevAnchorAssignment: ['P','K','6','S','A','Y'], // gorevRef (3 Eylül 2026) gününde personel[i]'nin görevi: Berke-Paket, Tarık-Konveyör, Fatih-Hat6, Abdullah-Sıkma, Sabri Can-Arka, Burak-Yağ
+    vardiyaRef: "2026-09-06",   // Gece vardiyası 1. gün (kısa dönüşle güncellendi). Bu tarihten ÖNCESİ artık gösterilmiyor/hesaplanmıyor.
+    gorevRef: "2026-09-07",     // Hat görev referansı (6. hat günü tablosu) - yeni vardiya düzenindeki ilk Hat günü
+    gorevAnchorAssignment: ['S','A','K','6','Y','P'], // gorevRef (7 Eylül 2026) gününde personel[i]'nin görevi: Berke-Sıkma, Tarık-Arka, Fatih-Konveyör, Abdullah-Hat6, Sabri Can-Yağ, Burak-Paket (3 Eylül'deki bilinen atamadan bir hat-günü ileri taşınarak hesaplandı)
     taskCycleOrder: ['Y','P','S','6','K','A'], // Yağ→Paket→Sıkma→Hat6→Konveyör→Arka→(tekrar Yağ)
-    htOverrides: [{date:"2026-09-05", flipFromDay:4}], // 5 Eylül 2026'da kısa dönüş (erken HT + 4. günden itibaren Hat/Saha ters döndü); 6 Eylül 2026 yeni Gece vardiyası 1. günü oldu. Bu tarihten ÖNCEKİ tüm günler değişmedi.
-    currentPerson: null         // index içine personel adı ya da "__GROUP__"
+    htOverrides: [],            // ["YYYY-MM-DD", ...] - amirlerin duyurduğu yeni/erken HT günleri
+    currentPerson: null,        // index içine personel adı ya da "__GROUP__"
+    calibrationVersion: CALIBRATION_VERSION
   };
+  var CALIBRATION_FIELDS = ['vardiyaRef','gorevRef','gorevAnchorAssignment','taskCycleOrder','htOverrides'];
 
   function loadSettings(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
       if(raw){
         var parsed = JSON.parse(raw);
-        return Object.assign({}, defaultSettings, parsed);
+        var merged = Object.assign({}, defaultSettings, parsed);
+        if(!parsed.calibrationVersion || parsed.calibrationVersion < CALIBRATION_VERSION){
+          CALIBRATION_FIELDS.forEach(function(key){ merged[key] = defaultSettings[key]; });
+          merged.calibrationVersion = CALIBRATION_VERSION;
+          try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); }catch(e){}
+        }
+        return merged;
       }
     }catch(e){ /* localStorage yoksa (ör. file:// iOS) bellekte devam */ }
     return Object.assign({}, defaultSettings);
   }
   function saveSettings(){
+    state.settings.calibrationVersion = CALIBRATION_VERSION;
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.settings)); }catch(e){}
   }
 
@@ -494,6 +546,13 @@
   }
 
   function dayInfo(date){
+    if(date < refDate()){
+      // Vardiya referans tarihinden önceki günler artık gösterilmiyor
+      // (kısa dönüşle referans tarihi ileri alındı, önceki düzen silindi).
+      // noData:true, gerçek bir HT (dinlenme) gününden ayırt edilebilsin diye
+      // (ör. Mesailer'in "boş" günleri mesai adayı sanmaması için).
+      return {shiftType:null, isRest:true, blockDay:null, hatSaha:null, noData:true};
+    }
     var block = findBlockFor(date);
     var info = {shiftType: block.shiftType, isRest:false, blockDay:null, hatSaha:null};
     if(daysDiff(date, block.htDate) === 0){ info.isRest = true; info.shiftType = null; return info; }
@@ -554,7 +613,13 @@
 
   function prevWorkDay(date){
     var d = new Date(date);
-    do{ d.setDate(d.getDate()-1); } while(dayInfo(d).isRest);
+    var guard = 0;
+    while(guard < 400){
+      d.setDate(d.getDate()-1);
+      guard++;
+      if(d < refDate()) break; // referans tarihinden önceye düşme, sonsuz döngüye girme
+      if(!dayInfo(d).isRest) break;
+    }
     return d;
   }
 
@@ -713,6 +778,7 @@
     });
     if(tabName === 'dahafazla') renderMoreScreen();
     if(tabName === 'raporlar') renderReportsScreen();
+    if(tabName === 'mesailer') renderMesailerScreen();
   }
   document.querySelectorAll('.navtab').forEach(function(btn){
     btn.addEventListener('click', function(){ switchTab(btn.getAttribute('data-tab')); });
@@ -996,6 +1062,223 @@
     }
 
     area.innerHTML = html;
+  }
+
+  /* ============================================================
+     MESAİLER (FAZLA MESAİ KAYIT VE ÖZET)
+  ============================================================ */
+  var MESAI_STORAGE_KEY = 'erdemirMesaiEntries_v1';
+
+  function loadMesaiEntries(){
+    try{
+      var raw = localStorage.getItem(MESAI_STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){ /* localStorage yoksa bellekte devam */ }
+    return [];
+  }
+  function saveMesaiEntries(){
+    try{ localStorage.setItem(MESAI_STORAGE_KEY, JSON.stringify(mesaiEntries)); }catch(e){}
+  }
+  var mesaiEntries = loadMesaiEntries();
+  var mesaiState = { year: null, month: null, person: null };
+
+  function mesaiEntriesForMonth(year, month){
+    var prefix = year + '-' + String(month+1).padStart(2,'0');
+    return mesaiEntries.filter(function(e){ return e.date && e.date.indexOf(prefix) === 0; });
+  }
+
+  function mesaiSummaryFor(entries, person){
+    var list = person ? entries.filter(function(e){ return e.person === person; }) : entries;
+    var saat = 0, gun = 0;
+    list.forEach(function(e){
+      if(e.basis === 'saat') saat += e.amount;
+      else gun += e.amount;
+    });
+    return {saat: saat, gun: gun};
+  }
+
+  function formatMesaiSummary(sum){
+    var parts = [];
+    if(sum.saat) parts.push(sum.saat + ' saat');
+    if(sum.gun) parts.push(sum.gun + ' gün');
+    return parts.length ? parts.join(' + ') : '—';
+  }
+
+  function renderMesailerScreen(){
+    var root = document.getElementById('mesailerContent');
+    var s = state.settings;
+    var cur = s.currentPerson;
+    var lockedPerson = (cur && cur !== '__GROUP__') ? cur : null;
+
+    if(mesaiState.year === null){
+      mesaiState.year = state.viewYear;
+      mesaiState.month = state.viewMonth;
+    }
+    mesaiState.person = lockedPerson || '__GROUP__';
+
+    var html = '<div class="settings-sheet">';
+    if(!lockedPerson){
+      html += '<div class="field"><label>Kişi / Grup</label><select id="mesaiPerson">';
+      html += '<option value="__GROUP__">Tüm Grup</option>';
+      s.personnel.forEach(function(name){ html += '<option value="'+name+'">'+name+'</option>'; });
+      html += '</select></div>';
+    }
+
+    html += '<div class="month-nav" style="margin-top:2px;">';
+    html += '<div class="month-label"><span id="mesaiMonthLabel"></span><small id="mesaiYearLabel"></small></div>';
+    html += '<div style="display:flex;">';
+    html += '<button class="navbtn" id="mesaiPrevMonth">&#8249;</button>';
+    html += '<button class="navbtn" id="mesaiNextMonth">&#8250;</button>';
+    html += '</div></div>';
+
+    html += '<div id="mesaiSummaryBox" style="margin-top:14px;"></div>';
+    html += '<div id="mesaiSuggestBox" style="margin-top:18px;"></div>';
+
+    html += '<div class="mesai-add-card"><label>Mesai Ekle</label>';
+    html += '<input type="date" id="mesaiAddDate" value="'+isoStr(new Date())+'">';
+    if(!lockedPerson){
+      html += '<select id="mesaiAddPerson">';
+      s.personnel.forEach(function(name){ html += '<option value="'+name+'">'+name+'</option>'; });
+      html += '</select>';
+    }
+    html += '<div class="field-row">';
+    html += '<select id="mesaiAddBasis"><option value="saat">Saat</option><option value="gun">Gün / Vardiya</option></select>';
+    html += '<input type="number" id="mesaiAddAmount" min="0" step="0.5" placeholder="Miktar">';
+    html += '</div>';
+    html += '<input type="text" id="mesaiAddNote" placeholder="Not (opsiyonel)">';
+    html += '<button class="save-btn" id="mesaiAddBtn">Ekle</button></div>';
+
+    html += '<div class="field" style="margin-top:18px;"><label>Bu Ayki Kayıtlar</label><div id="mesaiLogRows"></div></div>';
+    html += '</div>';
+
+    root.innerHTML = html;
+    updateMesaiMonthLabel();
+    renderMesaiDynamicParts();
+
+    if(!lockedPerson){
+      document.getElementById('mesaiPerson').value = mesaiState.person;
+      document.getElementById('mesaiPerson').addEventListener('change', function(){
+        mesaiState.person = this.value;
+        renderMesaiDynamicParts();
+      });
+    }
+    document.getElementById('mesaiPrevMonth').addEventListener('click', function(){
+      mesaiState.month--; if(mesaiState.month<0){mesaiState.month=11; mesaiState.year--;}
+      updateMesaiMonthLabel();
+      renderMesaiDynamicParts();
+    });
+    document.getElementById('mesaiNextMonth').addEventListener('click', function(){
+      mesaiState.month++; if(mesaiState.month>11){mesaiState.month=0; mesaiState.year++;}
+      updateMesaiMonthLabel();
+      renderMesaiDynamicParts();
+    });
+    document.getElementById('mesaiAddBtn').addEventListener('click', function(){
+      var date = document.getElementById('mesaiAddDate').value;
+      var person = lockedPerson || document.getElementById('mesaiAddPerson').value;
+      var basis = document.getElementById('mesaiAddBasis').value;
+      var amount = parseFloat(document.getElementById('mesaiAddAmount').value);
+      var note = document.getElementById('mesaiAddNote').value.trim();
+      if(!date){ alert('Lütfen bir tarih seçin.'); return; }
+      if(!amount || amount <= 0){ alert('Lütfen geçerli bir miktar girin.'); return; }
+      mesaiEntries.push({id: Date.now()+'-'+Math.random().toString(36).slice(2), date: date, person: person, basis: basis, amount: amount, note: note});
+      saveMesaiEntries();
+      document.getElementById('mesaiAddAmount').value = '';
+      document.getElementById('mesaiAddNote').value = '';
+      renderMesaiDynamicParts();
+    });
+  }
+
+  function updateMesaiMonthLabel(){
+    var lbl = document.getElementById('mesaiMonthLabel');
+    var ylbl = document.getElementById('mesaiYearLabel');
+    if(!lbl) return;
+    lbl.textContent = MONTHS[mesaiState.month];
+    ylbl.textContent = mesaiState.year;
+  }
+
+  function renderMesaiDynamicParts(){
+    var s = state.settings;
+    var year = mesaiState.year, month = mesaiState.month;
+    var person = mesaiState.person;
+    var isGroup = (person === '__GROUP__');
+    var monthEntries = mesaiEntriesForMonth(year, month);
+
+    // --- özet ---
+    var summaryBox = document.getElementById('mesaiSummaryBox');
+    var sHtml = '';
+    if(isGroup){
+      sHtml += '<div class="mesai-summary-grid">';
+      s.personnel.forEach(function(name){
+        var sum = mesaiSummaryFor(monthEntries, name);
+        sHtml += '<div class="mesai-summary-card"><b>'+name.split(' ')[0]+'</b><span>'+formatMesaiSummary(sum)+'</span></div>';
+      });
+      sHtml += '</div>';
+    } else {
+      var sum = mesaiSummaryFor(monthEntries, person);
+      sHtml += '<div class="mesai-summary-card mesai-summary-solo"><b>'+person+'</b><span>'+formatMesaiSummary(sum)+'</span></div>';
+    }
+    summaryBox.innerHTML = sHtml;
+
+    // --- otomatik adaylar: seçili kişi(ler)in bu ayki HT günlerinden henüz kayıt girilmemiş olanlar ---
+    var suggestBox = document.getElementById('mesaiSuggestBox');
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    var candidates = [];
+    var checkPersons = isGroup ? s.personnel : [person];
+    for(var d=1; d<=daysInMonth; d++){
+      var date = new Date(year, month, d);
+      var info = dayInfo(date);
+      if(!info.isRest || info.noData) continue;
+      var dateStr = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      checkPersons.forEach(function(name){
+        var already = mesaiEntries.some(function(e){ return e.date===dateStr && e.person===name; });
+        if(!already) candidates.push({date: dateStr, day: d, person: name});
+      });
+    }
+    var sugHtml = '<label class="flip-label" style="margin-bottom:6px;display:block;">Bu ay HT (dinlenme) gününde mesai olabilecek günler:</label>';
+    if(candidates.length === 0){
+      sugHtml += '<div class="hint">Bu ay için aday gün yok.</div>';
+    } else {
+      candidates.forEach(function(c){
+        sugHtml += '<div class="mesai-suggest-row"><span>'+c.day+' '+MONTHS[month].slice(0,3)+(isGroup ? ' · '+c.person.split(' ')[0] : '')+'</span>';
+        sugHtml += '<button class="add-btn mesai-suggest-btn" data-date="'+c.date+'" data-person="'+c.person+'">+ Ekle</button></div>';
+      });
+    }
+    suggestBox.innerHTML = sugHtml;
+    document.querySelectorAll('.mesai-suggest-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.getElementById('mesaiAddDate').value = btn.getAttribute('data-date');
+        var personSel = document.getElementById('mesaiAddPerson');
+        if(personSel) personSel.value = btn.getAttribute('data-person');
+        document.getElementById('mesaiAddAmount').focus();
+      });
+    });
+
+    // --- kayıt listesi ---
+    var logRoot = document.getElementById('mesaiLogRows');
+    var logEntries = isGroup ? monthEntries : monthEntries.filter(function(e){ return e.person===person; });
+    logEntries.sort(function(a,b){ return a.date.localeCompare(b.date); });
+    var logHtml = '';
+    if(logEntries.length === 0){
+      logHtml = '<div class="hint">Bu ay için kayıt yok.</div>';
+    } else {
+      logEntries.forEach(function(e){
+        var dayNum = +e.date.split('-')[2];
+        logHtml += '<div class="mesai-log-row">';
+        logHtml += '<div class="mesai-log-main"><b>'+dayNum+' '+MONTHS[month].slice(0,3)+'</b>'+(isGroup ? ' · '+e.person.split(' ')[0] : '')+' · '+e.amount+(e.basis==='saat' ? ' saat' : ' gün')+'</div>';
+        if(e.note) logHtml += '<div class="mesai-log-note">'+e.note+'</div>';
+        logHtml += '<button class="mesai-del-btn" data-id="'+e.id+'">Sil</button>';
+        logHtml += '</div>';
+      });
+    }
+    logRoot.innerHTML = logHtml;
+    document.querySelectorAll('.mesai-del-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-id');
+        mesaiEntries = mesaiEntries.filter(function(e){ return e.id !== id; });
+        saveMesaiEntries();
+        renderMesaiDynamicParts();
+      });
+    });
   }
 
   /* ============================================================
